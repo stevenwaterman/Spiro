@@ -1,8 +1,6 @@
 <script lang="ts">
   import Node from "./Node.svelte";
-  import {config} from "./config";
-
-  export let show: boolean;
+  import { config, duration } from "./config";
 </script>
 
 <style>
@@ -18,6 +16,6 @@
   }
 </style>
 
-<div class="anchor" class:show>
+<div class="anchor" style={`--duration: ${duration};`}>
   <Node {config}/>
 </div>

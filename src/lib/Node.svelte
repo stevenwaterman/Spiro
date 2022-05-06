@@ -16,7 +16,9 @@
   }
 
   .dot {
-    margin: 8px;
+    position: absolute;
+    top: 8px;
+    left: 8px;
     height: 4px;
     width: 4px;
     border-radius: 100%;

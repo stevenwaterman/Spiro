@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { PenWheelConfig } from "./config";
   import { linear } from "svelte/easing";
+  import { fade } from "svelte/transition";
+  import { duration, fraction, showStore, type PenWheelConfig } from "./config";
 
   export let config: PenWheelConfig;
-  export let show: boolean;
 
   let points: string;
   $: points = getPoints(config);
@@ -33,10 +33,7 @@
     return `${x * 20},${y * 20} `;
   }
 
-  function draw(node: SVGPolygonElement, _) {
-    const duration = 30_000;
-    const totalLength = node.getTotalLength();
-
+  function getPointLengths(node: SVGPolygonElement): number[] {
     const points = node.points;
     const pointLengths: number[] = [];
 
@@ -58,17 +55,27 @@
 
       lastPoint = point;
     }
-    pointLengths.push(totalLength);
+    pointLengths.push(node.getTotalLength());
+    return pointLengths;
+  }
+
+  function draw(polygon: SVGPolygonElement, {}: {}) {
+    const pointLengths = polygon === undefined ? [] : getPointLengths(polygon);
+    const fractionLength = pointLengths[Math.round((pointLengths.length - 1) * fraction)];
+    const totalLength = polygon.getTotalLength();
+
+    polygon.setAttribute("stroke-dasharray", `${totalLength} ${totalLength}`);
+    polygon.setAttribute("stroke-dashoffset", `${totalLength - fractionLength}`);
 
     function getStyleAt(t: number): string {
-      const point = Math.round(t * pointLengths.length);
+      const point = Math.round(t * fraction * (pointLengths.length - 1));
       const lengthAtPoint = pointLengths[point];
-      return `stroke-dasharray: ${lengthAtPoint} ${totalLength - lengthAtPoint}`
+      return `stroke-dashoffset: ${totalLength - lengthAtPoint}`
     }
 
     return {
         delay: 0,
-        duration,
+        duration: duration * 1000,
         easing: linear,
         css: getStyleAt
     };
@@ -83,10 +90,11 @@
   }
 </style>
 
-{#if show}
+{#if $showStore}
   <polygon
     {points}
     stroke={config.color}
-    in:draw="{{}}"
+    in:draw="{{duration: duration * 1000}}"
+    out:fade
   />
 {/if}

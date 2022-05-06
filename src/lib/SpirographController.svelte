@@ -2,8 +2,6 @@
   import { config, type ArmConfig, type PenWheelConfig } from "./config";
   import Spirograph from "./Spirograph.svelte";
 
-  export let show: boolean;
-
   function getPenWheelConfigs(config: ArmConfig): PenWheelConfig[] {
     const outputs: PenWheelConfig[] = [];
     for (let i = 0; i < config.length; i++) {
@@ -39,7 +37,7 @@
     ...penWheelConfigs.map(
         penConfig => penConfig.wheels.map(
           wheel => wheel.length
-        ).reduce((a,b) => a+b, 0))) * 20;
+        ).reduce((a,b) => a+b, 0))) * 20 + 10;
 </script>
 
 <svg
@@ -48,6 +46,6 @@
   height={maxRadius * 2}
 >
   {#each penWheelConfigs as penWheelConfig}
-    <Spirograph config={penWheelConfig} {show}/>
+    <Spirograph config={penWheelConfig}/>
   {/each}
 </svg>

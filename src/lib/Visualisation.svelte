@@ -1,21 +1,7 @@
 <script lang="ts">
-  import { afterUpdate, onMount } from "svelte";
-  import panzoom, { type PanZoom } from "panzoom";
   import SpirographController from "./SpirographController.svelte";
   import Anchor from "./Anchor.svelte";
-
-  let container: HTMLDivElement;
-
-  onMount(() => {
-    panzoom(container, {
-      minZoom: 0.1,
-      maxZoom: 5,
-      zoomDoubleClickSpeed: 1,
-      smoothScroll: false,
-    });
-  });
-
-  let show: boolean = false;
+  import { showStore } from "./config";
 </script>
 
 <style>
@@ -23,13 +9,9 @@
     position: fixed;
     left: 50%;
     top: 50%;
+    z-index: -10;
 
-    transform: translate(-50%, -50%);
-  }
-
-  .container {
-    display: inline-flex;
-    position: relative;
+    transform: translate(-50%, -50%) scale(1);
   }
 
   input {
@@ -39,13 +21,9 @@
   }
 </style>
 
-<input type="checkbox" bind:checked={show}/>
-
 <div class="outer">
-  <div class="container" bind:this={container}>
-    <SpirographController {show}/>
-    <Anchor {show}/>
-  </div>
+  <SpirographController/>
+  <Anchor/>
 </div>
 
-
+<input type="checkbox" bind:checked={$showStore}/>

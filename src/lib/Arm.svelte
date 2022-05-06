@@ -1,8 +1,29 @@
 <script lang="ts">
-  import type { ArmConfig } from "./config";
+  import { duration, fraction, showStore, type ArmConfig } from "./config";
 
   import Node from "./Node.svelte";
   export let config: ArmConfig;
+
+  let arm: HTMLDivElement | undefined;
+
+  let rotations: number;
+  $: rotations = config.rate * fraction;
+
+  let resetting: boolean = false;
+
+  $: if (arm !== undefined && !$showStore) {
+    const transform = getComputedStyle(arm).transform;
+    const [a,b] = transform
+      .substring(7, transform.length - 1)
+      .split(",")
+      .map(s => Number.parseFloat(s));
+    const shortcutRotations = Math.atan2(b, a) * (180/Math.PI) / 360;
+    arm.style.setProperty("--shortcutRotations", shortcutRotations + "turn");
+    resetting = true;
+    setTimeout(() => {
+      resetting = false;
+    })
+  }
 </script>
 
 <style>
@@ -23,29 +44,36 @@
     animation-timing-function: linear;
     animation-fill-mode: both;
     animation-iteration-count: 1;
-    animation-duration: 30s;
+
+    transform: rotate(0);
+
+    transition-property: transform;
+    transition-duration: 500ms;
+    transition-timing-function: linear;
   }
 
-  :global(.show) .arm {
-    animation-name: rotate;
+  .show.arm {
+    transform: rotate(calc(1turn * var(--rotations)));
+    transition-duration: calc(1s * var(--duration));
   }
 
-  @keyframes rotate {
-    from {
-      transform: rotate(0);
-    }
-
-    to {
-      transform: rotate(calc(1turn * var(--rate)));
-    }
+  .resetting.arm {
+    transition: none;
+    transform: rotate(var(--shortcutRotations));
   }
-
-  
 </style>
 
 <div
   class="arm"
-  style={`--rate: ${config.rate}; background-color: ${config.color}`}
+  bind:this={arm}
+  class:show={$showStore}
+  class:resetting
+
+  style={`
+    --rotations: ${rotations};
+    --duration: ${duration};
+    background-color: ${config.color};
+  `}
 >
   {#each config as _, i}
     <Node config={config.nodes[i]}/>
