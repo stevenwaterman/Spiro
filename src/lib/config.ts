@@ -44,7 +44,7 @@ export const config: ArmConfig = {
           nodeType: "ARM",
           length: 6,
           color: "lightgreen",
-          rate: -60,
+          rate: -10,
           phase: 0.1,
 
           nodes: {
@@ -74,6 +74,6 @@ export type PenWheelConfig = {
   color: string
 };
 
-export const duration = 30;
+export const duration = 5;
 export const fraction = 1;
 export const showStore: Writable<boolean> = writable(false);

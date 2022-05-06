@@ -95,6 +95,6 @@
     {points}
     stroke={config.color}
     in:draw="{{duration: duration * 1000}}"
-    out:fade
+    out:fade="{{duration: 100}}"
   />
 {/if}

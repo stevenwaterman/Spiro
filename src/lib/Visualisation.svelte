@@ -1,17 +1,46 @@
 <script lang="ts">
   import SpirographController from "./SpirographController.svelte";
   import Anchor from "./Anchor.svelte";
-  import { showStore } from "./config";
+  import { config, showStore, type ArmConfig } from "./config";
+
+  function getMaxRadius(config: ArmConfig): number {
+    const options: number[] = [config.length];
+
+    for (let i = 0; i < config.length; i++) {
+      const node = config.nodes[i];
+      if (node?.nodeType === "ARM") options.push(i + getMaxRadius(node));
+    }
+
+    return Math.max(...options);
+  }
+
+  let width: number;
+  let height: number;
+  let maxAllowedRadius: number;
+  $: maxAllowedRadius = Math.min(width, height) / 2;
+
+  let maxRadius: number;
+  $: maxRadius = getMaxRadius(config) * 20;
+
+  let scale: number;
+  $: scale = 0.9 * maxAllowedRadius / maxRadius;
 </script>
 
 <style>
-  .outer {
+  .center {
     position: fixed;
     left: 50%;
     top: 50%;
     z-index: -10;
+    transform: translate(-50%, -50%)
+  }
+  
+  .scale {
+    transition-property: transform;
+    transition-timing-function: ease-in-out;
+    transition-duration: 500ms;
 
-    transform: translate(-50%, -50%) scale(1);
+    transform: scale(var(--scale));
   }
 
   input {
@@ -21,9 +50,13 @@
   }
 </style>
 
-<div class="outer">
-  <SpirographController/>
-  <Anchor/>
+<svelte:window bind:innerWidth={width} bind:innerHeight={height}/>
+
+<div class="center">
+  <div class="scale" style={`--scale: ${scale}`}>
+    <SpirographController/>
+    <Anchor/>
+  </div>
 </div>
 
 <input type="checkbox" bind:checked={$showStore}/>
