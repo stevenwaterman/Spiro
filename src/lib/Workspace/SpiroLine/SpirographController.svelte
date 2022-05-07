@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { allNodeStores, anchorIdStore, nodeStores } from "$lib/state";
-  import type { ArmConfig, NodeConfig, PenConfig } from "$lib/types";
-  import { derived, type Readable, type Writable } from "svelte/store";
+  import { allNodeStores, anchorIdStore } from "$lib/state";
+  import type { ArmConfig, NodeConfig } from "$lib/types";
+import { identity } from "svelte/internal";
   import Spirograph from "./Spirograph.svelte";
   import type { PenWheelConfig, WheelConfig } from "./types";
 
@@ -11,13 +11,12 @@
   let nodeConfigLookup: Record<string, NodeConfig>;
   $: nodeConfigLookup = nodeConfigs.reduce((acc, elem) => {acc[elem.id] = elem; return acc;}, {});
 
-  $: console.log(nodeConfigLookup)
-
   let anchorId: string | undefined;
   $: anchorId = $anchorIdStore;
 
   let penWheelConfigs: PenWheelConfig[];
   $: penWheelConfigs = getPenWheelConfigs(nodeConfigLookup, anchorId);
+
 
   function getPenWheelConfigs(nodeConfigLookup: Record<string, NodeConfig>, anchorId: string | undefined): PenWheelConfig[] {
     if (anchorId === undefined) return [];
@@ -43,7 +42,7 @@
         node = nodeConfigLookup[nextNode] as ArmConfig;
       }
       // HACK this isn't actually an armconfig at this point, it's a penconfig, they just both have color here
-      penWheelConfigs.push({wheels: wheelConfigs, color: node.properties.color});
+      penWheelConfigs.push({wheels: wheelConfigs, color: node.properties.color, penId: node.id});
     }
     return penWheelConfigs;
   }
@@ -61,7 +60,7 @@
   width={maxRadius * 2}
   height={maxRadius * 2}
 >
-  {#each penWheelConfigs as penWheelConfig}
+  {#each penWheelConfigs as penWheelConfig (penWheelConfig.penId)}
     <Spirograph config={penWheelConfig} />
   {/each}
 </svg>

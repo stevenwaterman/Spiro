@@ -7,6 +7,7 @@ export type WheelConfig = {
 }
 
 export type PenWheelConfig = {
-  wheels: WheelConfig[],
-  color: string
+  wheels: WheelConfig[];
+  color: string;
+  penId: string;
 };

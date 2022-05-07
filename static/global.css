@@ -1,0 +1,13 @@
+body {
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+
+  --red: #e74645;
+  --orange: #facd60;
+  --teal: #1ac0c6;
+  --pink: #f782c2;
+  --green: #58b368;
+  --grey: #e3e3e3;
+}
+

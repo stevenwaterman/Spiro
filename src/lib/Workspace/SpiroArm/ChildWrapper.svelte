@@ -6,7 +6,6 @@
   import Pen from "./Pen.svelte";
 
   export let id: string | undefined;
-  export let idx: number;
   export let ghost: boolean = false;
 
   let nodeStore: Writable<NodeConfig> | undefined;
@@ -17,7 +16,7 @@
 </script>
 
 {#if id && $nodeStore?.nodeType === "ARM"}
-  <Arm {id} {idx} {ghost}/>
+  <Arm {id} {ghost}/>
 {:else if id && $nodeStore?.nodeType === "PEN"}
-  <Pen {id} {idx} {ghost}/>
+  <Pen {id} {ghost}/>
 {/if}

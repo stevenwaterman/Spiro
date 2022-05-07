@@ -94,7 +94,7 @@
 {#if $showStore}
   <polygon
     {points}
-    stroke={config.color}
+    style={`stroke: var(--${config.color});`}
     in:draw="{{duration: duration * 1000}}"
     out:fade="{{duration: 100}}"
   />

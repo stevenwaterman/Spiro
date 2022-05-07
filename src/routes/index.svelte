@@ -4,8 +4,17 @@
 </script>
 
 <style>
+  .row {
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    height: 100vh;
 
+    background-color: var(--grey);
+  }
 </style>
 
-<Visualisation/>
-<Controls/>
+<div class="row">
+  <Controls/>
+  <Visualisation/>
+</div>

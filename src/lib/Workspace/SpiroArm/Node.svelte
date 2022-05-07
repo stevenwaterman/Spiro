@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { nodeStores, selectionStore } from "$lib/state";
+  import { nodeStores, placeSelection, selectionStore } from "$lib/state";
   import type { ArmConfig, Placement } from "$lib/types";
   import type { Writable } from "svelte/store";
   import ChildWrapper from "./ChildWrapper.svelte";
@@ -23,30 +23,28 @@
     hovered = false;
   }
 
-  function mouseDown() {
+  function leftClick(event: MouseEvent) {
     if (!isPlacementOption) return;
 
-    const path = $parentStore.placement?.path ?? [];
-    const placement: Placement = {
-      path: [...path, idx],
-      phase: 0,
-      children: {},
-      parent: $parentStore.id
-    }
-
-    const selectionId = $selectionStore as string;
-    nodeStores[selectionId].update(conf => ({
-      ...conf,
-      placement
-    }));
-
-    parentStore.update(conf => {
-      const placement = conf.placement as Placement;
-      placement.children[idx] = $selectionStore as string;
-      return conf;
-    })
-
+    event.stopPropagation();
+    placeSelection($parentStore.id, $selectionStore as string, idx);
     selectionStore.set(undefined);
+  }
+
+  function scroll(event: WheelEvent) {
+    if (event.deltaY > 0) {
+      parentStore.update(conf => {
+        const placement = conf.placement as Placement;
+        placement.phase = (placement.phase + 0.125) % 1;
+        return conf;
+      })
+    } else if (event.deltaY < 0) {
+      parentStore.update(conf => {
+        const placement = conf.placement as Placement;
+        placement.phase = (placement.phase - 0.125) % 1;
+        return conf;
+      });
+    }
   }
 
   let rotation: number | undefined = undefined;
@@ -84,6 +82,10 @@
     height: 6px;
     width: 6px;
   }
+
+  .hasChild {
+    z-index: 1;
+  }
 </style>
 
 <div
@@ -91,16 +93,18 @@
   class:isFirst
   class:isPlacementOption
   class:hovered
-  on:mouseenter={mouseEnter}
-  on:mouseleave={mouseLeave}
-  on:mousedown={mouseDown}
+  on:mouseenter|stopPropagation={mouseEnter}
+  on:mouseleave|stopPropagation={mouseLeave}
+  on:click={leftClick}
+  on:wheel|stopPropagation={scroll}
   style={`transform: rotate(${rotation ?? 0}turn);`}
+  class:hasChild={childId !== undefined}
 >
   <div class="dot" />
 
   {#if isPlacementOption && hovered}
-    <ChildWrapper id={$selectionStore} {idx} ghost bind:rotation/>
+    <ChildWrapper id={$selectionStore} ghost bind:rotation/>
   {:else}
-    <ChildWrapper id={childId} {idx} bind:rotation/>
+    <ChildWrapper id={childId} bind:rotation/>
   {/if}
 </div>

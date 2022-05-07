@@ -1,11 +1,11 @@
 <script lang="ts">
-  import type { ArmConfig, Placement } from "$lib/types";
+  import type { ArmConfig } from "$lib/types";
+import { object_without_properties } from "svelte/internal";
   import type { Writable } from "svelte/store";
-  import { anchorIdStore, duration, fraction, nodeStores, showStore } from "../../state";
+  import { duration, fraction, nodeStores, removePiece, selectionStore, showStore } from "../../state";
   import Node from "./Node.svelte";
 
   export let id: string;
-  export let idx: number;
   export let ghost: boolean;
 
   let nodeStore: Writable<ArmConfig>;
@@ -33,21 +33,12 @@
   }
 
   function rightClick() {
-    const parentId: string | undefined = $nodeStore.placement?.parent;
-    if (parentId === undefined) {
-      anchorIdStore.set(undefined);
-    } else {
-      nodeStores[parentId].update(conf => {
-        const placement = conf.placement as Placement;
-        delete placement.children[idx];
-        return conf;
-      })
-    }
-    
-    nodeStore.update(conf => ({
-      ...conf,
-      placement: undefined
-    }));
+    removePiece(id);
+  }
+
+  function leftClick() {
+    removePiece(id);
+    selectionStore.set(id);
   }
 </script>
 
@@ -65,16 +56,15 @@
 
     transform-origin: 10px 10px;
 
-    animation-direction: normal;
-    animation-timing-function: linear;
-    animation-fill-mode: both;
-    animation-iteration-count: 1;
-
     transform: rotate(0);
 
     transition-property: transform;
     transition-duration: 500ms;
     transition-timing-function: linear;
+  }
+
+  .arm:not(.ghost) {
+    cursor: pointer;
   }
 
   .show.arm {
@@ -89,6 +79,14 @@
 
   .ghost {
     opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .speed {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
   }
 </style>
 
@@ -102,12 +100,15 @@
   style={`
     --rotations: ${rotations};
     --duration: ${duration};
-    background-color: ${$nodeStore.properties.color};
+    background-color: var(--${$nodeStore.properties.color});
   `}
 
   on:contextmenu|preventDefault|stopPropagation={rightClick}
+  on:click|stopPropagation={leftClick}
 >
   {#each {length: $nodeStore.properties.length} as _, i}
-    <Node childId={$nodeStore?.placement?.children?.[i]} idx={i} parentStore={nodeStore}/>
+    <Node childId={$nodeStore?.placement?.children?.[i]} idx={i} parentStore={nodeStore} />
   {/each}
+
+  <span class="speed">{$nodeStore.properties.rate}</span>
 </div>

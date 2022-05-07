@@ -20,11 +20,16 @@
 </script>
 
 <style>
+  .container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+  }
+
   .center {
-    position: fixed;
+    position: absolute;
     left: 50%;
     top: 50%;
-    z-index: -10;
     transform: translate(-50%, -50%)
   }
   
@@ -37,11 +42,12 @@
   }
 </style>
 
-<svelte:window bind:innerWidth={width} bind:innerHeight={height}/>
-
-<div class="center">
-  <div class="scale" style={`--scale: ${scale}`}>
-    <SpirographController/>
-    <Anchor/>
+<div class="container" bind:clientHeight={height} bind:clientWidth={width}>
+  <div class="center">
+    <div class="scale" style={`--scale: ${scale}`}>
+      <SpirographController/>
+      <Anchor/>
+    </div>
   </div>
 </div>
+

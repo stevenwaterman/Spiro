@@ -1,6 +1,14 @@
 <script lang="ts">
-  import { nodeStores, showStore } from "$lib/state";
-  import PieceOption from "./PieceOption.svelte";
+  import { selectionStore, showStore } from "$lib/state";
+  import Pieces from "./Pieces.svelte";
+
+  function keypress(event: KeyboardEvent) {
+    if (event.key === " ") {
+      showStore.update(show => !show);
+    } else if (event.key === "Escape") {
+      selectionStore.set(undefined);
+    }
+  }
 </script>
 
 <style>
@@ -11,30 +19,15 @@
     width: 10em;
     height: 100%;
     
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-
-    display: flex;
-    flex-direction: column;
-  }
-
-  .pieces {
-    flex-grow: 1;
-    width: 100%;
-
     display: flex;
     flex-direction: column;
   }
 </style>
 
+<svelte:body on:keydown={keypress}/>
+
 <div class="controls">
-  <div class="pieces">
-    {#each Object.values(nodeStores) as nodeStore}
-      <PieceOption nodeStore={nodeStore}/>
-    {/each}
-  </div>
+  <Pieces/>
 
   <input type="checkbox" bind:checked={$showStore}/>
 </div>

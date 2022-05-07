@@ -1,21 +1,34 @@
 <script lang="ts">
-  import { anchorIdStore, duration, selectionStore } from "../../state";
+import type { NodeConfig } from "$lib/types";
+import type { Writable } from "svelte/store";
+
+  import { anchorIdStore, duration, nodeStores } from "../../state";
   import ChildWrapper from "./ChildWrapper.svelte";
+
+  let anchorId: string | undefined;
+  $: anchorId = $anchorIdStore;
+
+  let anchorStore: Writable<NodeConfig> | undefined;
+  $: anchorStore = anchorId === undefined ? undefined : nodeStores[anchorId];
+
+  let anchorConfig: NodeConfig | undefined;
+  $: anchorConfig = anchorStore === undefined ? undefined : $anchorStore;
+
+  let rotation: number;
+  $: rotation = anchorConfig?.placement?.phase ?? 0;
 </script>
 
 <style>
   .anchor {
     position: absolute;
-    left: 50%;
-    top: 50%;
+    left: calc(50% - 10px);
+    top: calc(50% - 10px);
     width: 0;
     height: 0;
-
-    margin-top: -10px;
-    margin-left: -10px;
+    transform-origin: 10px 10px;
   }
 </style>
 
-<div class="anchor" style={`--duration: ${duration};`}>
-  <ChildWrapper idx={0} id={$anchorIdStore}/>
+<div class="anchor" style={`--duration: ${duration}; transform: rotate(${rotation ?? 0}turn);`}>
+  <ChildWrapper id={$anchorIdStore}/>
 </div>
