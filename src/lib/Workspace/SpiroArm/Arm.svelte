@@ -1,13 +1,20 @@
 <script lang="ts">
-  import { duration, fraction, showStore, type ArmConfig } from "./config";
-
+  import type { ArmConfig, Placement } from "$lib/types";
+  import type { Writable } from "svelte/store";
+  import { anchorIdStore, duration, fraction, nodeStores, showStore } from "../../state";
   import Node from "./Node.svelte";
-  export let config: ArmConfig;
+
+  export let id: string;
+  export let idx: number;
+  export let ghost: boolean;
+
+  let nodeStore: Writable<ArmConfig>;
+  $: nodeStore = nodeStores[id] as Writable<ArmConfig>;
 
   let arm: HTMLDivElement | undefined;
 
   let rotations: number;
-  $: rotations = config.rate * fraction;
+  $: rotations = $nodeStore.properties.rate * fraction;
 
   let resetting: boolean = false;
 
@@ -23,6 +30,24 @@
     setTimeout(() => {
       resetting = false;
     })
+  }
+
+  function rightClick() {
+    const parentId: string | undefined = $nodeStore.placement?.parent;
+    if (parentId === undefined) {
+      anchorIdStore.set(undefined);
+    } else {
+      nodeStores[parentId].update(conf => {
+        const placement = conf.placement as Placement;
+        delete placement.children[idx];
+        return conf;
+      })
+    }
+    
+    nodeStore.update(conf => ({
+      ...conf,
+      placement: undefined
+    }));
   }
 </script>
 
@@ -61,6 +86,10 @@
     transition: none;
     transform: rotate(var(--shortcutRotations));
   }
+
+  .ghost {
+    opacity: 0.5;
+  }
 </style>
 
 <div
@@ -68,14 +97,17 @@
   bind:this={arm}
   class:show={$showStore}
   class:resetting
+  class:ghost
 
   style={`
     --rotations: ${rotations};
     --duration: ${duration};
-    background-color: ${config.color};
+    background-color: ${$nodeStore.properties.color};
   `}
+
+  on:contextmenu|preventDefault|stopPropagation={rightClick}
 >
-  {#each config as _, i}
-    <Node config={config.nodes[i]}/>
+  {#each {length: $nodeStore.properties.length} as _, i}
+    <Node childId={$nodeStore?.placement?.children?.[i]} idx={i} parentStore={nodeStore}/>
   {/each}
 </div>

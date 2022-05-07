@@ -1,7 +1,8 @@
 <script lang="ts">
   import { linear } from "svelte/easing";
   import { fade } from "svelte/transition";
-  import { duration, fraction, showStore, type PenWheelConfig } from "./config";
+  import { duration, fraction, showStore } from "../../state";
+  import type { PenWheelConfig } from "./types";
 
   export let config: PenWheelConfig;
 

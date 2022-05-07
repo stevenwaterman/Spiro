@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Node from "./Node.svelte";
-  import { config, duration } from "./config";
+  import { anchorIdStore, duration, selectionStore } from "../../state";
+  import ChildWrapper from "./ChildWrapper.svelte";
 </script>
 
 <style>
@@ -17,5 +17,5 @@
 </style>
 
 <div class="anchor" style={`--duration: ${duration};`}>
-  <Node {config}/>
+  <ChildWrapper idx={0} id={$anchorIdStore}/>
 </div>

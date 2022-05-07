@@ -1,7 +1,6 @@
 <script lang="ts">
-import Visualisation from "$lib/Visualisation.svelte";
-
-
+  import Controls from "$lib/Controls/Controls.svelte";
+  import Visualisation from "$lib/Workspace/Visualisation.svelte";
 </script>
 
 <style>
@@ -9,3 +8,4 @@ import Visualisation from "$lib/Visualisation.svelte";
 </style>
 
 <Visualisation/>
+<Controls/>
