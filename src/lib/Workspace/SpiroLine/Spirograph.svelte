@@ -1,5 +1,5 @@
 <script lang="ts">
-import { answerCorrectStore, levelCompleteStore } from "$lib/levels";
+import { answerCorrectStore, levelCompleteStore, levelStore } from "$lib/levels";
 
   import { linear } from "svelte/easing";
   import { fade } from "svelte/transition";
@@ -57,14 +57,21 @@ import { answerCorrectStore, levelCompleteStore } from "$lib/levels";
 
       lastPoint = point;
     }
-    pointLengths.push(node.getTotalLength());
+
+    const length = Math.sqrt(
+      Math.pow(points[0].x - points[points.length - 1].x, 2) + 
+      Math.pow(points[0].y - points[points.length - 1].y, 2)
+    );
+    const lastLength = pointLengths[pointLengths.length - 1];
+    pointLengths.push(lastLength + length);
+    
     return pointLengths;
   }
 
   function draw(polygon: SVGPolygonElement, {}: {}) {
     const pointLengths = polygon === undefined ? [] : getPointLengths(polygon);
     const fractionLength = pointLengths[Math.round((pointLengths.length - 1) * fraction)];
-    const totalLength = polygon.getTotalLength();
+    const totalLength = pointLengths[pointLengths.length - 1];
 
     polygon.setAttribute("stroke-dasharray", `${totalLength} ${totalLength}`);
     polygon.setAttribute("stroke-dashoffset", `${totalLength - fractionLength}`);

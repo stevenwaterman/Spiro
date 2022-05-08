@@ -4,7 +4,7 @@
   import type { Writable } from "svelte/store";
   import ChildWrapper from "./ChildWrapper.svelte";
 
-  export let parentStore: Writable<ArmConfig>;
+  export let parentConfig: ArmConfig;
   export let childId: string | undefined;
   export let idx: number;
 
@@ -13,7 +13,7 @@
 
   let isPlacementOption: boolean;
   $: isPlacementOption =
-    !isFirst && $selectionStore !== undefined && childId === undefined && $parentStore.placement !== undefined;
+    !isFirst && $selectionStore !== undefined && childId === undefined && parentConfig.placement !== undefined;
 
   let hovered: boolean = false;
   function mouseEnter() {
@@ -27,23 +27,17 @@
     if (!isPlacementOption) return;
 
     event.stopPropagation();
-    placeSelection($parentStore.id, $selectionStore as string, idx);
+    placeSelection(parentConfig.id, $selectionStore as string, idx);
     selectionStore.set(undefined);
   }
 
   function scroll(event: WheelEvent) {
     if (event.deltaY > 0) {
-      parentStore.update(conf => {
-        const placement = conf.placement as Placement;
-        placement.phase = (placement.phase + 0.125) % 1;
-        return conf;
-      })
+      const placement = parentConfig.placement as Placement;
+      placement.phase = (placement.phase + 0.125) % 1;
     } else if (event.deltaY < 0) {
-      parentStore.update(conf => {
-        const placement = conf.placement as Placement;
-        placement.phase = (placement.phase - 0.125) % 1;
-        return conf;
-      });
+      const placement = parentConfig.placement as Placement;
+      placement.phase = (placement.phase - 0.125) % 1;
     }
   }
 

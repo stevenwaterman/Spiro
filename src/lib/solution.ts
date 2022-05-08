@@ -59,7 +59,7 @@ export function normaliseWheels(wheels: WheelConfig[]): WheelConfig[] {
     }, []).map(configs => combineMultipleSameRate(configs));
 
   const rateList = combinedRates.map(config => Math.abs(config.rate)).filter(rate => rate !== 0);
-  const rateGCD = rateList.reduce(gcd);
+  const rateGCD = rateList.reduce(gcd, 1);
   const normalisedRates = combinedRates.map(config => ({ ...config, rate: config.rate / rateGCD }));
 
   const normalisedPhase = normalisedRates.map(config => ({ ...config, phase: config.phase % 1 }));

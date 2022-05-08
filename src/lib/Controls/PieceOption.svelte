@@ -1,18 +1,15 @@
 <script lang="ts">
   import { anchorIdStore, removePiece, selectionStore } from "$lib/state";
   import type { NodeConfig } from "$lib/types";
-  import type { Writable } from "svelte/store";
   import ArmOption from "./ArmOption.svelte";
   import PenOption from "./PenOption.svelte";
 
-  export let nodeStore: Writable<NodeConfig>;
+  export let nodeConfig: NodeConfig;
 
   let available: boolean;
-  $: if ($nodeStore.placement !== undefined) {
+  $: if (nodeConfig.placement !== undefined) {
     available = false;
-  } else if ($anchorIdStore !== undefined) {
-    available = true;
-  } else if ($nodeStore.nodeType === "ARM") {
+  } else if (nodeConfig.nodeType === "ARM" || $anchorIdStore !== undefined) {
     available = true;
   } else {
     available = false;
@@ -20,19 +17,19 @@
 
   function mouseDown() {
     if (!available) return;
-    selectionStore.set($nodeStore.id);
+    selectionStore.set(nodeConfig.id);
   }
 
   function rightClick() {
-    if ($nodeStore.placement === undefined) return;
-    removePiece($nodeStore.id);
+    if (nodeConfig.placement === undefined) return;
+    removePiece(nodeConfig.id);
   }
 
   let gridCells: number;
-  $: if($nodeStore.nodeType === "PEN") {
+  $: if(nodeConfig.nodeType === "PEN") {
     gridCells = 2;
   } else {
-    gridCells = $nodeStore.properties.length + 1;
+    gridCells = nodeConfig.properties.length + 1;
   }
 </script>
 
@@ -62,19 +59,19 @@
   }
 </style>
 
-{#key $nodeStore.id}
+{#key nodeConfig.id}
   <div
     class="option"
     class:available
-    class:selected={$selectionStore === $nodeStore.id}
+    class:selected={$selectionStore === nodeConfig.id}
     on:mousedown={mouseDown}
     on:contextmenu|preventDefault|stopPropagation={rightClick}
     style={`grid-row-end: span ${gridCells}`}
   >
-    {#if $nodeStore.nodeType === "ARM"}
-      <ArmOption id={$nodeStore.id}/>
+    {#if nodeConfig.nodeType === "ARM"}
+      <ArmOption id={nodeConfig.id}/>
     {:else}
-      <PenOption id={$nodeStore.id}/>
+      <PenOption id={nodeConfig.id}/>
     {/if}
   </div>
 {/key}

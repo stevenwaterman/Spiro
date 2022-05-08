@@ -1,13 +1,12 @@
 <script lang="ts">
-  import { getNodeStore, removePiece, selectionStore } from "$lib/state";
+  import { nodesConfigStore, removePiece, selectionStore } from "$lib/state";
   import type { PenConfig } from "$lib/types";
-  import type { Writable } from "svelte/store";
   
   export let id: string;
   export let ghost: boolean;
 
-  let nodeStore: Writable<PenConfig>;
-  $: nodeStore = getNodeStore(id) as Writable<PenConfig>;
+  let penConfig: PenConfig;
+  $: penConfig = $nodesConfigStore[id] as PenConfig;
 
   function rightClick() {
     removePiece(id);
@@ -43,7 +42,7 @@
 <div
   class="pen"
   class:ghost
-  style={`background-color: var(--${$nodeStore.properties.color})`}
+  style={`background-color: var(--${penConfig.properties.color})`}
   on:contextmenu|preventDefault|stopPropagation={rightClick}
   on:click|stopPropagation={leftClick}
 />

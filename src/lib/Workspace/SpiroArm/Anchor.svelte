@@ -1,18 +1,15 @@
 <script lang="ts">
   import type { NodeConfig } from "$lib/types";
   import type { Writable } from "svelte/store";
-  import { anchorIdStore, duration, getNodeStore } from "../../state";
+  import { anchorIdStore, duration, nodesConfigStore } from "../../state";
   import ChildWrapper from "./ChildWrapper.svelte";
   import {levelCompleteStore} from "$lib/levels";
 
   let anchorId: string | undefined;
   $: anchorId = $anchorIdStore;
 
-  let anchorStore: Writable<NodeConfig> | undefined;
-  $: anchorStore = anchorId === undefined ? undefined : getNodeStore(anchorId);
-
   let anchorConfig: NodeConfig | undefined;
-  $: anchorConfig = anchorStore === undefined ? undefined : $anchorStore;
+  $: anchorConfig = anchorId === undefined ? undefined : $nodesConfigStore[anchorId];
 
   let rotation: number;
   $: rotation = anchorConfig?.placement?.phase ?? 0;

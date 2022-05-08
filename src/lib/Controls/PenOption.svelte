@@ -1,13 +1,11 @@
 <script lang="ts">
-  import { getNodeStore } from "$lib/state";
+  import { nodesConfigStore } from "$lib/state";
   import type { PenConfig } from "$lib/types";
-
-  import type { Writable } from "svelte/store";
   
   export let id: string;
 
-  let nodeStore: Writable<PenConfig>;
-  $: nodeStore = getNodeStore(id) as Writable<PenConfig>;
+  let penConfig: PenConfig;
+  $: penConfig = $nodesConfigStore[id] as PenConfig;
 </script>
 
 <style>
@@ -20,5 +18,5 @@
 
 <div
   class="option"
-  style={`background-color: var(--${$nodeStore.properties.color})`}
+  style={`background-color: var(--${penConfig.properties.color})`}
 />

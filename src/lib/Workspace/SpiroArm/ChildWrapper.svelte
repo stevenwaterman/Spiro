@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { getNodeStore } from "$lib/state";
+import { nodesConfigStore } from "$lib/state";
+
   import type { NodeConfig } from "$lib/types";
   import type { Writable } from "svelte/store";
   import Arm from "./Arm.svelte";
@@ -8,15 +9,15 @@
   export let id: string | undefined;
   export let ghost: boolean = false;
 
-  let nodeStore: Writable<NodeConfig> | undefined;
-  $: nodeStore = id === undefined ? undefined : getNodeStore(id);
+  let nodeConfig: NodeConfig | undefined;
+  $: nodeConfig = id === undefined ? undefined : $nodesConfigStore[id];
 
   export let rotation: number | undefined = undefined;
-  $: rotation = $nodeStore?.placement?.phase;
+  $: rotation = nodeConfig?.placement?.phase;
 </script>
 
-{#if id && $nodeStore?.nodeType === "ARM"}
+{#if id && nodeConfig?.nodeType === "ARM"}
   <Arm {id} {ghost}/>
-{:else if id && $nodeStore?.nodeType === "PEN"}
+{:else if id && nodeConfig?.nodeType === "PEN"}
   <Pen {id} {ghost}/>
 {/if}

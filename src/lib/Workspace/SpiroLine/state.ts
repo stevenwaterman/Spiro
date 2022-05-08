@@ -1,14 +1,12 @@
 import { normaliseWheels } from "$lib/solution";
-import { anchorIdStore, nodeStoresWrapped } from "$lib/state";
+import { anchorIdStore, nodesConfigStore } from "$lib/state";
 import type { NodeConfig, ArmConfig } from "$lib/types";
 import { deriveUnwrapRecord } from "$lib/utils";
 import { derived, type Readable } from "svelte/store";
 import type { PenWheelConfig, WheelConfig } from "./types";
 
-export const nodeConfigLookupStore: Readable<Partial<Record<string, NodeConfig>>> = deriveUnwrapRecord(nodeStoresWrapped);
-
 export const penWheelConfigsStore: Readable<PenWheelConfig[]> = derived(
-  [anchorIdStore, nodeConfigLookupStore],
+  [anchorIdStore, nodesConfigStore],
   ([anchorId, nodeConfigLookup]) => {
     if (anchorId === undefined) return [];
 

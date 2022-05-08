@@ -1,19 +1,19 @@
 <script lang="ts">
   import type { ArmConfig } from "$lib/types";
   import type { Writable } from "svelte/store";
-  import { duration, fraction, getNodeStore, removePiece, selectionStore, showStore } from "../../state";
+  import { duration, fraction, nodesConfigStore, removePiece, selectionStore, showStore } from "../../state";
   import Node from "./Node.svelte";
 
   export let id: string;
   export let ghost: boolean;
 
-  let nodeStore: Writable<ArmConfig>;
-  $: nodeStore = getNodeStore(id) as Writable<ArmConfig>;
+  let nodeConfig: ArmConfig;
+  $: nodeConfig = $nodesConfigStore[id] as ArmConfig;
 
   let arm: HTMLDivElement | undefined;
 
   let rotations: number;
-  $: rotations = $nodeStore.properties.rate * fraction;
+  $: rotations = nodeConfig.properties.rate * fraction;
 
   let resetting: boolean = false;
 
@@ -41,7 +41,7 @@
   }
 
   let length: number;
-  $: length = $nodeStore.properties.length;
+  $: length = nodeConfig.properties.length;
 
   let maxIdx: number;
   $: maxIdx = length - 1;
@@ -109,15 +109,15 @@
   style={`
     --rotations: ${rotations};
     --duration: ${duration};
-    background-color: var(--light${$nodeStore.properties.color});
+    background-color: var(--light${nodeConfig.properties.color});
   `}
 
   on:contextmenu|preventDefault|stopPropagation={rightClick}
   on:click|stopPropagation={leftClick}
 >
   {#each {length} as _, i}
-    <Node childId={$nodeStore?.placement?.children?.[maxIdx - i]} idx={maxIdx - i} parentStore={nodeStore} />
+    <Node childId={nodeConfig?.placement?.children?.[maxIdx - i]} idx={maxIdx - i} parentConfig={nodeConfig} />
   {/each}
 
-  <span class="speed" style={`color: var(--${$nodeStore.properties.color});`}>{$nodeStore.properties.rate}</span>
+  <span class="speed" style={`color: var(--${nodeConfig.properties.color});`}>{nodeConfig.properties.rate}</span>
 </div>

@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { getNodeStore } from "$lib/state";
+import { nodesConfigStore } from "$lib/state";
+
   import type { ArmConfig } from "$lib/types";
-  import type { Writable } from "svelte/store";
 
   export let id: string;
 
-  let nodeStore: Writable<ArmConfig>;
-  $: nodeStore = getNodeStore(id) as Writable<ArmConfig>;
+  let armConfig: ArmConfig;
+  $: armConfig = $nodesConfigStore[id] as ArmConfig;
 </script>
 
 <style>
@@ -45,10 +45,10 @@
 
 <div
   class="option"
-  style={`background-color: var(--light${$nodeStore.properties.color}); --length: ${$nodeStore.properties.length}`}
+  style={`background-color: var(--light${armConfig.properties.color}); --length: ${armConfig.properties.length}`}
 >
   <div class="dot"/>
-  <span class="speed" style={`color: var(--${$nodeStore.properties.color});`}>
-    {$nodeStore.properties.rate}
+  <span class="speed" style={`color: var(--${armConfig.properties.color});`}>
+    {armConfig.properties.rate}
   </span>
 </div>
