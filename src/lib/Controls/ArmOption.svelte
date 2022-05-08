@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { nodeStores } from "$lib/state";
+  import { getNodeStore } from "$lib/state";
   import type { ArmConfig } from "$lib/types";
   import type { Writable } from "svelte/store";
 
   export let id: string;
 
   let nodeStore: Writable<ArmConfig>;
-  $: nodeStore = nodeStores[id] as Writable<ArmConfig>;
+  $: nodeStore = getNodeStore(id) as Writable<ArmConfig>;
 </script>
 
 <style>

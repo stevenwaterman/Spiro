@@ -1,6 +1,14 @@
 <script lang="ts">
-import { nodeStores } from "$lib/state";
-import PieceOption from "./PieceOption.svelte";
+  import { nodeStoresWrapped } from "$lib/state";
+  import type { NodeConfig } from "$lib/types";
+  import type { Writable } from "svelte/store";
+  import PieceOption from "./PieceOption.svelte";
+
+  let nodeStoresMap: Record<string, Writable<NodeConfig>>;
+  $: nodeStoresMap = $nodeStoresWrapped
+
+  let nodeStores: Writable<NodeConfig>[];
+  $: nodeStores = Object.values(nodeStoresMap);
 </script>
 
 <style>
@@ -15,7 +23,7 @@ import PieceOption from "./PieceOption.svelte";
 </style>
 
 <div class="pieces">
-  {#each Object.values(nodeStores) as nodeStore}
+  {#each nodeStores as nodeStore}
     <PieceOption nodeStore={nodeStore}/>
   {/each}
 </div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { anchorIdStore, nodeStores, removePiece, selectionStore } from "$lib/state";
+  import { anchorIdStore, getNodeStore, removePiece, selectionStore } from "$lib/state";
   import type { PenConfig, Placement } from "$lib/types";
 
   import type { Writable } from "svelte/store";
@@ -8,7 +8,7 @@
   export let ghost: boolean;
 
   let nodeStore: Writable<PenConfig>;
-  $: nodeStore = nodeStores[id] as Writable<PenConfig>;
+  $: nodeStore = getNodeStore(id) as Writable<PenConfig>;
 
   function rightClick() {
     removePiece(id);

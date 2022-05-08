@@ -2,14 +2,14 @@
 import type { NodeConfig } from "$lib/types";
 import type { Writable } from "svelte/store";
 
-  import { anchorIdStore, duration, nodeStores } from "../../state";
+  import { anchorIdStore, duration, getNodeStore } from "../../state";
   import ChildWrapper from "./ChildWrapper.svelte";
 
   let anchorId: string | undefined;
   $: anchorId = $anchorIdStore;
 
   let anchorStore: Writable<NodeConfig> | undefined;
-  $: anchorStore = anchorId === undefined ? undefined : nodeStores[anchorId];
+  $: anchorStore = anchorId === undefined ? undefined : getNodeStore(anchorId);
 
   let anchorConfig: NodeConfig | undefined;
   $: anchorConfig = anchorStore === undefined ? undefined : $anchorStore;

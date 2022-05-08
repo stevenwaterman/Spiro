@@ -23,10 +23,8 @@
     let x = 0;
     let y = 0;
 
-    let phase = 0;
     config.wheels.forEach(wheel => {
-      phase += wheel.phase;
-      phase += t * wheel.rate;
+      const phase = wheel.phase + t * wheel.rate;
       x += Math.cos(phase) * wheel.length;
       y += Math.sin(phase) * wheel.length;
     });
@@ -87,7 +85,7 @@
   polygon {
     stroke-width: 2;
     fill: transparent;
-    opacity: 0.2;
+    opacity: 0.6;
   }
 </style>
 

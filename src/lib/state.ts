@@ -2,65 +2,21 @@ import { get_store_value, identity } from "svelte/internal";
 import { derived, writable, type Readable, type Writable } from "svelte/store";
 import type { NodeConfig, Placement } from "./types";
 
-export const nodeStores: Record<string, Writable<NodeConfig>> = {};
+export const nodeStoresWrapped: Writable<Record<string, Writable<NodeConfig>>> = writable({});
+let nodeStores: Record<string, Writable<NodeConfig>> = {};
+nodeStoresWrapped.subscribe(s => nodeStores = s);
+
+export function getNodeStore(id: string): Writable<NodeConfig> {
+  const nodeStore = nodeStores[id];
+  // console.log("node store", id, nodeStore);
+  return nodeStore;
+}
+
 export const anchorIdStore: Writable<string | undefined> = writable(undefined);
 
 export const duration = 5;
 export const fraction = 1;
 export const showStore: Writable<boolean> = writable(false);
-
-const a: Writable<NodeConfig> = writable({
-  id: "A",
-  nodeType: "ARM",
-  properties: {
-    length: 5,
-    rate: 1,
-    color: "red"
-  }
-});
-nodeStores["A"] = a;
-
-const b: Writable<NodeConfig> = writable({
-  id: "B",
-  nodeType: "PEN",
-  properties: {
-    color: "teal",
-  }
-});
-nodeStores["B"] = b;
-
-const c: Writable<NodeConfig> = writable({
-  id: "C",
-  nodeType: "ARM",
-  properties: {
-    length: 6,
-    rate: -2,
-    color: "orange"
-  }
-});
-nodeStores["C"] = c;
-
-const d: Writable<NodeConfig> = writable({
-  id: "D",
-  nodeType: "ARM",
-  properties: {
-    length: 3,
-    rate: 3,
-    color: "green"
-  }
-});
-nodeStores["D"] = d;
-
-const e: Writable<NodeConfig> = writable({
-  id: "E",
-  nodeType: "PEN",
-  properties: {
-    color: "pink",
-  }
-});
-nodeStores["E"] = e;
-
-export const allNodeStores: Readable<NodeConfig[]> = derived([a,b,c,d,e], i=>i);
 
 export const selectionStore: Writable<string | undefined> = writable(undefined);
 
@@ -71,7 +27,7 @@ anchorIdStore.subscribe(anchor => {
   }
 
   if (anchor !== undefined) {
-    const nodeStore = nodeStores[anchor];
+    const nodeStore = getNodeStore(anchor);
     nodeStore.update(config => ({
       ...config,
       placement: {
@@ -94,8 +50,8 @@ derived([anchorIdStore, selectionStore], identity).subscribe(([anchor, selection
 });
 
 export function placeSelection(parentId: string, childId: string, idx: number) {
-  const parentStore = nodeStores[parentId];
-  const childStore = nodeStores[childId];
+  const parentStore = getNodeStore(parentId);
+  const childStore = getNodeStore(childId);
 
   parentStore.update(parentConf => {
     const parentPlacement = parentConf.placement as Placement;
@@ -117,7 +73,7 @@ export function placeSelection(parentId: string, childId: string, idx: number) {
 }
 
 export function removePiece(id: string) {
-  const store = nodeStores[id];
+  const store = getNodeStore(id);
   const conf = get_store_value(store);
   const placement = conf.placement;
   if (placement !== undefined) {
@@ -126,7 +82,7 @@ export function removePiece(id: string) {
     } else {
       const { path, parent } = placement;
       const idx = path[path.length - 1];
-      const parentStore = nodeStores[parent];
+      const parentStore = getNodeStore(parent);
       parentStore.update(parentConf => {
         delete parentConf.placement?.children?.[idx];
         return parentConf;
@@ -137,7 +93,7 @@ export function removePiece(id: string) {
 }
 
 function removePieceInner(id: string) {
-  nodeStores[id].update(conf => {
+  getNodeStore(id).update(conf => {
     const placement = conf.placement;
     if (placement !== undefined) {
       const children = Object.values(placement.children);

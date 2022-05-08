@@ -1,22 +1,27 @@
 <script lang="ts">
-  import { allNodeStores, anchorIdStore } from "$lib/state";
+  import { answerStore, radiusStore } from "$lib/levels";
+  import { anchorIdStore, nodeStoresWrapped } from "$lib/state";
   import type { ArmConfig, NodeConfig } from "$lib/types";
-import { identity } from "svelte/internal";
+  import { identity } from "svelte/internal";
+  import { derived, type Readable, type Writable } from "svelte/store";
   import Spirograph from "./Spirograph.svelte";
+  import SpirographAnswer from "./SpirographAnswer.svelte";
   import type { PenWheelConfig, WheelConfig } from "./types";
 
-  let nodeConfigs: NodeConfig[];
-  $: nodeConfigs = $allNodeStores;
+  let nodeStores: Writable<NodeConfig>[];
+  $: nodeStores = Object.values($nodeStoresWrapped);
+
+  let combinedStore: Readable<NodeConfig[]>;
+  $: combinedStore = derived(nodeStores, identity);
 
   let nodeConfigLookup: Record<string, NodeConfig>;
-  $: nodeConfigLookup = nodeConfigs.reduce((acc, elem) => {acc[elem.id] = elem; return acc;}, {});
+  $: nodeConfigLookup = $combinedStore.reduce((acc, elem) => {acc[elem.id] = elem; return acc;}, {});
 
   let anchorId: string | undefined;
   $: anchorId = $anchorIdStore;
 
   let penWheelConfigs: PenWheelConfig[];
   $: penWheelConfigs = getPenWheelConfigs(nodeConfigLookup, anchorId);
-
 
   function getPenWheelConfigs(nodeConfigLookup: Record<string, NodeConfig>, anchorId: string | undefined): PenWheelConfig[] {
     if (anchorId === undefined) return [];
@@ -33,9 +38,11 @@ import { identity } from "svelte/internal";
       const wheelConfigs: WheelConfig[] = [];
       let node: ArmConfig = anchor;
       for (const pathLength of penPath) {
+        const prevPhase = wheelConfigs.length === 0 ? 0 : wheelConfigs[wheelConfigs.length - 1].phase;
+        const prevRate = wheelConfigs.length === 0 ? 0 : wheelConfigs[wheelConfigs.length - 1].rate;
         wheelConfigs.push({
-          phase: (node.placement?.phase as number) * 2 * Math.PI,
-          rate: node.properties.rate,
+          phase: prevPhase + (node.placement?.phase as number) * 2 * Math.PI,
+          rate: prevRate + node.properties.rate,
           length: pathLength,
         });
         const nextNode = node.placement?.children?.[pathLength] as string;
@@ -46,20 +53,17 @@ import { identity } from "svelte/internal";
     }
     return penWheelConfigs;
   }
-
-  let maxRadius: number;
-  $: maxRadius = Math.max(0, 
-    ...penWheelConfigs.map(
-        penConfig => penConfig.wheels.map(
-          wheel => wheel.length
-        ).reduce((a,b) => a+b, 0))) * 20 + 10;
 </script>
 
 <svg
-  viewBox={`${-maxRadius} ${-maxRadius} ${maxRadius * 2} ${maxRadius * 2}`}
-  width={maxRadius * 2}
-  height={maxRadius * 2}
+  viewBox={`${-$radiusStore} ${-$radiusStore} ${$radiusStore * 2} ${$radiusStore * 2}`}
+  width={$radiusStore * 2}
+  height={$radiusStore * 2}
 >
+  {#each $answerStore as answer}
+    <SpirographAnswer config={answer}/>
+  {/each}
+
   {#each penWheelConfigs as penWheelConfig (penWheelConfig.penId)}
     <Spirograph config={penWheelConfig} />
   {/each}

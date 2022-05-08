@@ -1,15 +1,14 @@
 <script lang="ts">
   import type { ArmConfig } from "$lib/types";
-import { object_without_properties } from "svelte/internal";
   import type { Writable } from "svelte/store";
-  import { duration, fraction, nodeStores, removePiece, selectionStore, showStore } from "../../state";
+  import { duration, fraction, getNodeStore, removePiece, selectionStore, showStore } from "../../state";
   import Node from "./Node.svelte";
 
   export let id: string;
   export let ghost: boolean;
 
   let nodeStore: Writable<ArmConfig>;
-  $: nodeStore = nodeStores[id] as Writable<ArmConfig>;
+  $: nodeStore = getNodeStore(id) as Writable<ArmConfig>;
 
   let arm: HTMLDivElement | undefined;
 
@@ -40,12 +39,18 @@ import { object_without_properties } from "svelte/internal";
     removePiece(id);
     selectionStore.set(id);
   }
+
+  let length: number;
+  $: length = $nodeStore.properties.length;
+
+  let maxIdx: number;
+  $: maxIdx = length - 1;
 </script>
 
 <style>
   .arm {
     display: flex;
-    flex-direction: row;
+    flex-direction: row-reverse;
 
     position: absolute;
     left: 0;
@@ -87,6 +92,7 @@ import { object_without_properties } from "svelte/internal";
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    pointer-events: none;
   }
 </style>
 
@@ -106,8 +112,8 @@ import { object_without_properties } from "svelte/internal";
   on:contextmenu|preventDefault|stopPropagation={rightClick}
   on:click|stopPropagation={leftClick}
 >
-  {#each {length: $nodeStore.properties.length} as _, i}
-    <Node childId={$nodeStore?.placement?.children?.[i]} idx={i} parentStore={nodeStore} />
+  {#each {length} as _, i}
+    <Node childId={$nodeStore?.placement?.children?.[maxIdx - i]} idx={maxIdx - i} parentStore={nodeStore} />
   {/each}
 
   <span class="speed">{$nodeStore.properties.rate}</span>

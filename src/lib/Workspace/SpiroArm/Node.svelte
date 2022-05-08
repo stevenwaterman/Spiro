@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { nodeStores, placeSelection, selectionStore } from "$lib/state";
+  import { placeSelection, selectionStore } from "$lib/state";
   import type { ArmConfig, Placement } from "$lib/types";
   import type { Writable } from "svelte/store";
   import ChildWrapper from "./ChildWrapper.svelte";
