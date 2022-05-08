@@ -1,15 +1,14 @@
 import { get_store_value, identity } from "svelte/internal";
-import { derived, writable, type Readable, type Writable } from "svelte/store";
+import { derived, writable, type Writable } from "svelte/store";
 import type { NodeConfig, Placement } from "./types";
 
 export const nodeStoresWrapped: Writable<Record<string, Writable<NodeConfig>>> = writable({});
 let nodeStores: Record<string, Writable<NodeConfig>> = {};
 nodeStoresWrapped.subscribe(s => nodeStores = s);
 
+
 export function getNodeStore(id: string): Writable<NodeConfig> {
-  const nodeStore = nodeStores[id];
-  // console.log("node store", id, nodeStore);
-  return nodeStore;
+  return nodeStores[id];
 }
 
 export const anchorIdStore: Writable<string | undefined> = writable(undefined);
@@ -22,6 +21,7 @@ export const selectionStore: Writable<string | undefined> = writable(undefined);
 
 let oldAnchor: string | undefined = undefined;
 anchorIdStore.subscribe(anchor => {
+  // console.log("hi");
   if (oldAnchor !== undefined) {
     removePieceInner(oldAnchor);
   }

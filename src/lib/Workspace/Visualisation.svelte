@@ -2,6 +2,7 @@
   import SpirographController from "./SpiroLine/SpirographController.svelte";
   import Anchor from "./SpiroArm/Anchor.svelte";
   import { radiusStore } from "$lib/levels";
+  import { answerCorrectStore } from "$lib/solution";
 
   let width: number;
   let height: number;
@@ -46,9 +47,13 @@
 
     transform: translate(-50%, -50%);
   }
+
+  .success {
+    background-color: green;
+  }
 </style>
 
-<div class="container" bind:clientHeight={height} bind:clientWidth={width}>
+<div class="container" bind:clientHeight={height} bind:clientWidth={width} class:success={$answerCorrectStore}>
   <div class="center">
     <div class="scale" style={`--scale: ${scale}`}>
       <div class="dot"/>
