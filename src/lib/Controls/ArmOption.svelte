@@ -24,7 +24,7 @@
     position: absolute;
     border-radius: 100%;
 
-    background-color: rgba(0, 0, 0);
+    background-color: var(--black);
     top: 7px;
     left: 7px;
     height: 6px;
@@ -35,14 +35,20 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%);
+    pointer-events: none;
+
+    font-weight: bold;
+    transform: translate(-50%, -50%) rotate(0.25turn);
+    font-size: 16px;
   }
 </style>
 
 <div
   class="option"
-  style={`background-color: var(--${$nodeStore.properties.color}); --length: ${$nodeStore.properties.length}`}
+  style={`background-color: var(--light${$nodeStore.properties.color}); --length: ${$nodeStore.properties.length}`}
 >
   <div class="dot"/>
-  <span class="speed">{$nodeStore.properties.rate}</span>
+  <span class="speed" style={`color: var(--${$nodeStore.properties.color});`}>
+    {$nodeStore.properties.rate}
+  </span>
 </div>

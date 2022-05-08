@@ -13,11 +13,11 @@
     width: 100vw;
     height: 100vh;
 
-    background-color: var(--grey);
+    background-color: var(--black);
   }
 </style>
 
-<svelte:body on:contextmenu|preventDefault/>
+<!-- <svelte:body on:contextmenu|preventDefault/> -->
 
 <div class="row">
   <Controls/>

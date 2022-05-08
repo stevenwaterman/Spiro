@@ -12,16 +12,15 @@ export function getNodeStore(id: string): Writable<NodeConfig> {
 }
 
 export const anchorIdStore: Writable<string | undefined> = writable(undefined);
+export const selectionStore: Writable<string | undefined> = writable(undefined);
 
 export const duration = 5;
 export const fraction = 1;
-export const showStore: Writable<boolean> = writable(false);
+export const showStore = derived(selectionStore, selection => selection === undefined);
 
-export const selectionStore: Writable<string | undefined> = writable(undefined);
 
 let oldAnchor: string | undefined = undefined;
 anchorIdStore.subscribe(anchor => {
-  // console.log("hi");
   if (oldAnchor !== undefined) {
     removePieceInner(oldAnchor);
   }

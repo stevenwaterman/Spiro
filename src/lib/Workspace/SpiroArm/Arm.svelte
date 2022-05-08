@@ -91,8 +91,11 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%);
     pointer-events: none;
+
+    font-weight: bold;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
   }
 </style>
 
@@ -106,7 +109,7 @@
   style={`
     --rotations: ${rotations};
     --duration: ${duration};
-    background-color: var(--${$nodeStore.properties.color});
+    background-color: var(--light${$nodeStore.properties.color});
   `}
 
   on:contextmenu|preventDefault|stopPropagation={rightClick}
@@ -116,5 +119,5 @@
     <Node childId={$nodeStore?.placement?.children?.[maxIdx - i]} idx={maxIdx - i} parentStore={nodeStore} />
   {/each}
 
-  <span class="speed">{$nodeStore.properties.rate}</span>
+  <span class="speed" style={`color: var(--${$nodeStore.properties.color});`}>{$nodeStore.properties.rate}</span>
 </div>

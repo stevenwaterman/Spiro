@@ -1,12 +1,4 @@
-import { derived, writable, type Readable, type Writable } from "svelte/store";
-import { normalisedPenWheelConfigsStore } from "./Workspace/SpiroLine/state";
 import type { WheelConfig } from "./Workspace/SpiroLine/types";
-
-export const answerStore: Writable<WheelConfig[][]> = writable([]);
-
-export const answerCorrectStore: Readable<boolean> = derived(
-  [answerStore, normalisedPenWheelConfigsStore],
-  ([actual, user]) => answersMatch(actual, user));
 
 export function answersMatch(as: WheelConfig[][], bs: WheelConfig[][]): boolean {
   return as.every(a => bs.some(b => pensMatch(a, b))) &&

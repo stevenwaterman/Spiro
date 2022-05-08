@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { anchorIdStore, getNodeStore, removePiece, selectionStore } from "$lib/state";
-  import type { PenConfig, Placement } from "$lib/types";
-
+  import { getNodeStore, removePiece, selectionStore } from "$lib/state";
+  import type { PenConfig } from "$lib/types";
   import type { Writable } from "svelte/store";
   
   export let id: string;

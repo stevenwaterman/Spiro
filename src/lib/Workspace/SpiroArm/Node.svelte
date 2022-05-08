@@ -76,7 +76,7 @@
   }
 
   .isFirst .dot {
-    background-color: rgba(0, 0, 0);
+    background-color: var(--black);
     top: 7px;
     left: 7px;
     height: 6px;

@@ -36,7 +36,7 @@
     stroke-width: 2;
     fill: transparent;
     opacity: 0.2;
-    stroke: black;
+    stroke: var(--white);
   }
 </style>
 

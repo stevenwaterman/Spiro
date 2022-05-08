@@ -2,12 +2,28 @@ body {
   padding: 0;
   margin: 0;
   overflow: hidden;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
 
-  --red: #e74645;
-  --orange: #facd60;
-  --teal: #1ac0c6;
-  --pink: #f782c2;
-  --green: #58b368;
-  --grey: #e3e3e3;
+  --lightred: #ffadad;
+  --red: #f94144;
+  
+  --lightorange: #ffd6a5;
+  --orange: #F8961E;
+
+  --lightyellow: #fdffb6;
+  --yellow: #f9c74f;
+
+  --lightgreen: #caffbf;
+  --green: #90be6d;
+
+  --lightblue: #a0c4ff;
+  --blue: #277da1;
+
+  --lightpurple: #bdb2ff;
+  --purple: #54478c;
+
+  --white: #cee3e1;
+  --grey: #708d8b;
+  --black: #002a32;
 }
 

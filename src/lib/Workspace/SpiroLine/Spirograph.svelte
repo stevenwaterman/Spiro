@@ -1,9 +1,12 @@
 <script lang="ts">
+import { answerCorrectStore, levelCompleteStore } from "$lib/levels";
+
   import { linear } from "svelte/easing";
   import { fade } from "svelte/transition";
   import { duration, fraction, showStore } from "../../state";
   import type { PenWheelConfig } from "./types";
 
+  export let idx: number;
   export let config: PenWheelConfig;
 
   let points: string;
@@ -79,21 +82,40 @@
         css: getStyleAt
     };
   }
+
+  function animationDone() {
+    if (idx === 0 && $answerCorrectStore) {
+      levelCompleteStore.set(true);
+    }
+  }
 </script>
 
 <style>
   polygon {
-    stroke-width: 2;
+    stroke-width: 4;
     fill: transparent;
-    opacity: 0.6;
+    opacity: 0.5;
+
+    transition-property: filter, opacity;
+    transition-duration: 1s;
+  }
+
+  .levelComplete {
+    opacity: 1;
+  }
+
+  polygon:not(.levelComplete) {
+    filter: none !important;
   }
 </style>
 
 {#if $showStore}
   <polygon
     {points}
-    style={`stroke: var(--${config.color});`}
+    style={`stroke: var(--${config.color}); filter: drop-shadow(0px 0px 10px var(--light${config.color}));`}
+    class:levelComplete={$levelCompleteStore}
     in:draw="{{duration: duration * 1000}}"
     out:fade="{{duration: 100}}"
+    on:introend={animationDone}
   />
 {/if}

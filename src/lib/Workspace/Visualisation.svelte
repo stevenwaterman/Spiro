@@ -1,8 +1,7 @@
 <script lang="ts">
   import SpirographController from "./SpiroLine/SpirographController.svelte";
   import Anchor from "./SpiroArm/Anchor.svelte";
-  import { radiusStore } from "$lib/levels";
-  import { answerCorrectStore } from "$lib/solution";
+  import { levelCompleteStore, levelStore, radiusStore } from "$lib/levels";
 
   let width: number;
   let height: number;
@@ -15,12 +14,14 @@
 
 <style>
   .container {
+    display: inline-flex;
     position: relative;
     height: 100%;
     width: 100%;
   }
 
   .center {
+    display: inline-flex;
     position: absolute;
     left: 50%;
     top: 50%;
@@ -28,6 +29,7 @@
   }
   
   .scale {
+    display: inline-flex;
     transition-property: transform;
     transition-timing-function: ease-in-out;
     transition-duration: 500ms;
@@ -42,24 +44,29 @@
 
     width: 6px;
     height: 6px;
-    background-color: black;
+    background-color: var(--white);
     border-radius: 100%;
 
     transform: translate(-50%, -50%);
+
+    transition-property: opacity;
+    transition-duration: 1s;
   }
 
-  .success {
-    background-color: green;
+  .hide {
+    opacity: 0;
   }
 </style>
 
-<div class="container" bind:clientHeight={height} bind:clientWidth={width} class:success={$answerCorrectStore}>
-  <div class="center">
-    <div class="scale" style={`--scale: ${scale}`}>
-      <div class="dot"/>
-      <SpirographController/>
-      <Anchor/>
+{#key $levelStore}
+  <div class="container" bind:clientHeight={height} bind:clientWidth={width}>
+    <div class="center">
+      <div class="scale" style={`--scale: ${scale}`}>
+        <div class="dot" class:hide={$levelCompleteStore}/>
+        <SpirographController/>
+        <Anchor/>
+      </div>
     </div>
   </div>
-</div>
+{/key}
 
