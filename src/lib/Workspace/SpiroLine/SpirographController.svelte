@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { answerStore, levelCompleteStore, levelStore, radiusStore } from "$lib/levels";
+  import { answerStore, levelCompleteStore, radiusStore } from "$lib/levels";
   import Spirograph from "./Spirograph.svelte";
   import SpirographAnswer from "./SpirographAnswer.svelte";
   import { penWheelConfigsStore } from "./state";

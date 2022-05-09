@@ -12,7 +12,7 @@
   $: anchorConfig = anchorId === undefined ? undefined : $nodesConfigStore[anchorId];
 
   let rotation: number;
-  $: rotation = anchorConfig?.placement?.phase ?? 0;
+  $: rotation = (anchorConfig?.placement?.phase ?? 0) / 12;
 </script>
 
 <style>
@@ -33,6 +33,6 @@
   }
 </style>
 
-<div class="anchor" class:hide={$levelCompleteStore} style={`--duration: ${$durationStore}; transform: rotate(${rotation ?? 0}turn);`}>
+<div class="anchor" class:hide={$levelCompleteStore} style={`--duration: ${$durationStore}; transform: rotate(${rotation}turn);`}>
   <ChildWrapper id={$anchorIdStore}/>
 </div>

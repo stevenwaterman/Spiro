@@ -1,6 +1,5 @@
 <script lang="ts">
-import { answerCorrectStore, levelCompleteStore, levelStore } from "$lib/levels";
-
+  import { answerCorrectStore, levelCompleteStore } from "$lib/levels";
   import { linear } from "svelte/easing";
   import { fade } from "svelte/transition";
   import { durationStore, fraction, showStore } from "../../state";
@@ -27,7 +26,7 @@ import { answerCorrectStore, levelCompleteStore, levelStore } from "$lib/levels"
     let y = 0;
 
     config.wheels.forEach(wheel => {
-      const phase = wheel.phase * 2 * Math.PI + t * wheel.rate;
+      const phase = (wheel.phase / 12) * 2 * Math.PI + t * wheel.rate;
       x += Math.cos(phase) * wheel.length;
       y += Math.sin(phase) * wheel.length;
     });
@@ -122,7 +121,6 @@ import { answerCorrectStore, levelCompleteStore, levelStore } from "$lib/levels"
     style={`stroke: var(--${config.color}); filter: drop-shadow(0px 0px 10px var(--light${config.color}));`}
     class:levelComplete={$levelCompleteStore}
     in:draw="{{}}"
-    out:fade="{{duration: $durationStore * 1000}}"
     on:introend={animationDone}
   />
 {/if}

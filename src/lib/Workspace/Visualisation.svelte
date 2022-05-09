@@ -9,7 +9,7 @@
   $: maxAllowedRadius = Math.min(width, height) / 2;
 
   let scale: number;
-  $: scale = Math.min(10, 0.8 * maxAllowedRadius / $radiusStore);
+  $: scale = Math.min(10, maxAllowedRadius / $radiusStore);
 </script>
 
 <style>

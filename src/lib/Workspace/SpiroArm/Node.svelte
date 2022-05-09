@@ -34,16 +34,16 @@
   function scroll(event: WheelEvent) {
     const placement: Placement = parentConfig.placement as Placement;
     if (event.deltaY > 0) {
-      placement.phase = (placement.phase + 0.125) % 1;
+      placement.phase = (placement.phase + 1) % 12;
       nodesConfigStore.set($nodesConfigStore);
     } else if (event.deltaY < 0) {
-      placement.phase = (placement.phase - 0.125) % 1;
+      placement.phase = (placement.phase - 1) % 12;
       nodesConfigStore.set($nodesConfigStore);
     }
     
   }
 
-  let rotation: number | undefined = undefined;
+  let rotation: number;
 </script>
 
 <style>

@@ -1,3 +1,4 @@
+import { createEventDispatcher } from "svelte";
 import { derived, writable, type Readable, type Writable } from "svelte/store";
 import { answersMatch, fromWheelConfigToString, normaliseWheels } from "./solution";
 import { anchorIdStore, durationStore, nodesConfigStore, selectionStore } from "./state";
@@ -71,6 +72,7 @@ export function loadLevel(levelId: number) {
 }
 
 const levels: Record<number, Level> = {
+  // Starting
   1: createLevel(
     "Starting Simple",
     1,
@@ -79,6 +81,7 @@ const levels: Record<number, Level> = {
     createPen("green")
   ),
 
+  // Length Exists, You don't have to place pens at the end
   2: createLevel(
     "Lengthy Lesson",
     1,
@@ -87,6 +90,7 @@ const levels: Record<number, Level> = {
     createPen("green")
   ),
 
+  // You can join multiple arms together
   3: createLevel(
     "Teamwork",
     3,
@@ -96,6 +100,7 @@ const levels: Record<number, Level> = {
     createPen("green")
   ),
 
+  // Combining everything so far
   4: createLevel(
     "All Together",
     3,
@@ -106,6 +111,7 @@ const levels: Record<number, Level> = {
     createPen("green")
   ),
 
+  // Different Speeds Exist
   5: createLevel(
     "Speedy Session",
     3,
@@ -116,6 +122,15 @@ const levels: Record<number, Level> = {
   ),
 
   6: createLevel(
+    "Spin Slightly",
+    3,
+    [[{length: 3, rate: 1, phase: 0}, {length: 4, rate: 4, phase: 0}]],
+    createArm(5, 1, "red"),
+    createArm(5, 3, "orange"),
+    createPen("green")
+  ),
+
+  7: createLevel(
     "Spin Crazy",
     5,
     [[{length: 3, rate: 1, phase: 0}, {length: 3, rate: 13, phase: 0}]],
@@ -124,33 +139,144 @@ const levels: Record<number, Level> = {
     createPen("green")
   ),
 
-  7: createLevel(
+  8: createLevel(
     "Getting Rapid",
     10,
-    [[{length: 9, rate: 1, phase: 0}, {length: 5, rate: 7, phase: 1}, {length: 1, rate: 31, phase: 0}]],
+    [[{length: 9, rate: 1, phase: 0}, {length: 5, rate: 7, phase: 0}, {length: 1, rate: 31, phase: 0}]],
     createArm(10, 1, "red"),
     createArm(6, 6, "blue"),
     createArm(3, 24, "orange"),
     createPen("green")
   ),
 
+  9: createLevel(
+    "Flux Capacitor",
+    5,
+    [[{length: 5, rate: 1, phase: 0}, {length: 3, rate: 2, phase: 0}, {length: 2, rate: 3, phase: 0}, {length: 1, rate: 6, phase: 0}]],
+    createArm(6, 1, "red"),
+    createArm(4, 1, "orange"),
+    createArm(4, 1, "blue"),
+    createArm(4, 3, "purple"),
+    createPen("green")
+  ),
+
+  // Introducing negative speeds
   10: createLevel(
     "Going Both Ways",
-    5,
+    3,
     [[{length: 2, rate: 1, phase: 0}, {length: 3, rate: 0, phase: 0}]],
     createArm(4, 1, "red"),
     createArm(4, -1, "blue"),
     createPen("green")
   ),
 
+  11: createLevel(
+    "Squishy",
+    3,
+    [[{length: 4, rate: 1, phase: 0}, {length: 2, rate: -1, phase: 0}]],
+    createArm(5, -1, "red"),
+    createArm(4, 2, "blue"),
+    createPen("green")
+  ),
+
   12: createLevel(
-    "R-R-R-Rotate",
+    "'Peach'",
     5,
-    [[{length: 3, rate: 1, phase: 0}, {length: 3, rate: 2, phase: 0.25}]],
+    [[{length: 4, rate: 1, phase: 0}, {length: 2, rate: 2, phase: 0}, {length: 3, rate: 0, phase: 0}]],
+    createArm(5, 1, "red"),
+    createArm(3, 1, "orange"),
+    createArm(4, -2, "blue"),
+    createPen("green")
+  ),
+
+  13: createLevel(
+    "Windmill",
+    5,
+    [[{length: 5, rate: 1, phase: 0}, {length: 5, rate: -2, phase: 0}]],
+    createArm(6, -1, "red"),
+    createArm(6, 3, "orange"),
+    createPen("green")
+  ),
+
+  14: createLevel(
+    "Fishy",
+    5,
+    [[{length: 5, rate: 1, phase: 0}, {length: 3, rate: 2, phase: 0}, {length: 5, rate: -1, phase: 0}]],
+    createArm(6, -1, "red"),
+    createArm(4, -1, "orange"),
+    createArm(6, 3, "blue"),
+    createPen("green")
+  ),
+
+  // Introducing Phase
+  15: createLevel(
+    "Scroll Stroll",
+    5,
+    [[{length: 3, rate: 1, phase: 0}, {length: 3, rate: 2, phase: 3}]],
     createArm(4, 1, "red"),
     createArm(4, 1, "blue"),
     createPen("green")
-  )
+  ),
+
+  16: createLevel(
+    "Spectacle",
+    5,
+    [[{length: 3, rate: 1, phase: 3}, {length: 3, rate: 2, phase: 3}, {length: 4, rate: 4, phase: 3}]],
+    createArm(4, 1, "red"),
+    createArm(4, 1, "blue"),
+    createArm(5, 2, "orange"),
+    createPen("green")
+  ),
+
+  17: createLevel(
+    "Dice",
+    5,
+    [[{length: 3, rate: 1, phase: 2}, {length: 2, rate: 5, phase: 10}, {length: 1, rate: -3, phase: 0}]],
+    createArm(4, 1, "red"),
+    createArm(3, 4, "blue"),
+    createArm(2, -8, "orange"),
+    createPen("green")
+  ),
+
+  18: createLevel(
+    "Dice",
+    5,
+    //4x-2+2 4x-1+1 3x0+-3 1x5+-11
+    //4x-2+6 4x-1+3 3x0+9 1x5+-9
+    [[{length: 4, rate: 1, phase: 0}, {length: 4, rate: 2, phase: 0}, {length: 3, rate: 0, phase: 9}, {length: 1, rate: -5, phase: 6}]],
+    createArm(5, 1, "red"),
+    createArm(5, 1, "blue"),
+    createArm(4, -2, "orange"),
+    createArm(2, -5, "purple"),
+    createPen("green")
+  ),
+
+  19: createLevel(
+    "Orbital",
+    5,
+    [[{length: 3, rate: 1, phase: 0}, {length: 2, rate: 3, phase: 2}, {length: 3, rate: 2, phase: 6}]],
+    createArm(4, 1, "red"),
+    createArm(4, 2, "blue"),
+    createArm(4, -1, "orange"),
+    createPen("green")
+  ),
+
+  
+
+  // Multiple rotations
+  100: createLevel(
+    "Twinkle",
+    5,
+    [[{length: 5, rate: 2, phase: 0}, {length: 2, rate: 0, phase: 0}, {length: 2, rate: -3, phase: 0}]],
+    createArm(6, 2, "red"),
+    createArm(4, -2, "orange"),
+    createArm(3, -3, "blue"),
+    createPen("green")
+  ),
+
+  // 0-rate arms
+  // You don't need to use all of them
+  // Multiple pens
 }
 
 export const levelStore: Writable<number> = writable(1);
@@ -163,6 +289,10 @@ export const answerCorrectStore: Readable<boolean> = derived(
   [answerStore, normalisedPenWheelConfigsStore],
   ([actual, user]) => answersMatch(actual, user));
 
+answerCorrectStore.subscribe(correct => {
+  if(correct) console.log("done");
+})
+
 export const levelCompleteStore: Writable<boolean> = writable(false);
 
 nodesConfigStore.subscribe(() => levelCompleteStore.set(false));
@@ -171,5 +301,5 @@ export const radiusStore: Readable<number> = derived(answerStore, answers => {
   const radii = answers.map(answer => answer
     .map(wheel => wheel.length * 20)
     .reduce((a,b) => a+b, 10));
-  return Math.max(100, ...radii);
+  return Math.max(100, ...radii) * 1.25;
 });

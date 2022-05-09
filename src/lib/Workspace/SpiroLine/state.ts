@@ -1,7 +1,6 @@
 import { fromWheelConfigToString, normaliseWheels } from "$lib/solution";
 import { anchorIdStore, nodesConfigStore } from "$lib/state";
 import type { NodeConfig, ArmConfig } from "$lib/types";
-import { deriveUnwrapRecord } from "$lib/utils";
 import { derived, type Readable } from "svelte/store";
 import type { PenWheelConfig, WheelConfig } from "./types";
 

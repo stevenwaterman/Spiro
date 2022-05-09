@@ -12,8 +12,8 @@ import { nodesConfigStore } from "$lib/state";
   let nodeConfig: NodeConfig | undefined;
   $: nodeConfig = id === undefined ? undefined : $nodesConfigStore[id];
 
-  export let rotation: number | undefined = undefined;
-  $: rotation = nodeConfig?.placement?.phase;
+  export let rotation: number = 0;
+  $: rotation = (nodeConfig?.placement?.phase ?? 0) / 12;
 </script>
 
 {#if id && nodeConfig?.nodeType === "ARM"}

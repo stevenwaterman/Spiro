@@ -62,7 +62,7 @@ export function normaliseWheels(wheels: WheelConfig[]): WheelConfig[] {
   const rateGCD = rateList.reduce(gcd, 1);
   const normalisedRates = combinedRates.map(config => ({ ...config, rate: config.rate / rateGCD }));
 
-  const normalisedPhase = normalisedRates.map(config => ({ ...config, phase: config.phase % 1 }));
+  const normalisedPhase = normalisePhase(normalisedRates)
   const normalString = fromWheelConfigToString(normalisedPhase);
 
   const invertRate = normalisedPhase.map(config => ({ ...config, rate: -config.rate }));
@@ -109,4 +109,26 @@ function gcd(a: number, b: number): number {
     if (a == 0) return b;
     b %= a;
   }
+}
+
+function normalisePhase(normalisedRates: WheelConfig[]): WheelConfig[] {
+  const phaseGTZero: WheelConfig[] = normalisedRates.map(wheel => {
+    const phase = ((wheel.phase % 12) + 12) % 12;
+    return {...wheel, phase: phase};
+  })
+
+  const phaseOptions: WheelConfig[][] = [];
+  const phaseTotals: number[] = [];
+
+  for(let i = 0; i < 12; i++) {
+    const option = phaseGTZero.map(wheel => ({...wheel, phase: (wheel.phase + (wheel.rate * i)) % 12}));
+    const phaseTotal = option.map(wheel => wheel.phase).reduce((a,b) => a+b, 0);
+    
+    phaseOptions.push(option);
+    phaseTotals.push(phaseTotal);
+  }
+
+  const minPhaseTotal: number = Math.min(...phaseTotals);
+  const idx = phaseTotals.indexOf(minPhaseTotal);
+  return phaseOptions[idx];
 }
