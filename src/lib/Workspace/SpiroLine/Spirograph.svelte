@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { answerCorrectStore, levelCompleteStore } from "$lib/levels";
+  import { answerCorrectStore, durationStore, levelCompleteStore } from "$lib/levels";
   import { linear } from "svelte/easing";
-  import { fade } from "svelte/transition";
-  import { durationStore, fraction, showStore } from "../../state";
+  import { fraction, showStore } from "../../state";
   import type { PenWheelConfig } from "./types";
 
   export let idx: number;

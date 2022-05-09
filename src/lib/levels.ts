@@ -1,7 +1,8 @@
 import { derived, writable, type Readable, type Writable } from "svelte/store";
 import { answersMatch, fromStringToWheelConfig, fromWheelConfigToString, normaliseWheels } from "./solution";
-import { anchorIdStore, durationStore, nodesConfigStore, selectionStore } from "./state";
-import type { ArmConfig, Color, NodeConfig, PenConfig, Rates } from "./types";
+import { nodeLookupStore, selectionStore } from "./state";
+import type { ArmConfig, Color, Length, NodeConfig, PenConfig, Phase, Rates } from "./types";
+import { clone } from "./utils";
 import { normalisedPenWheelConfigsStore } from "./Workspace/SpiroLine/state";
 import type { WheelConfig } from "./Workspace/SpiroLine/types";
 
@@ -28,15 +29,18 @@ function createLevel(name: string, duration: number, answer: WheelConfig[][], ..
   };
 }
 
-function createArm(length: number, rate: Rates, color: Color, count?: number): ArmConfig[] {
+function createArm(length: Length, rate: Rates, color: Color, phase: Phase = 0, count?: number): ArmConfig[] {
   const output: ArmConfig[] = [];
   for (let i = 0; i < (count ?? 1); i++) {
     output.push({
       id: "TODO",
-      nodeType: "ARM",
-      properties: {
-        length, rate, color
-      }
+      type: "ARM",
+      parent: undefined,
+
+      length,
+      rate,
+      color,
+      phase
     });
   }
   return output;
@@ -45,27 +49,11 @@ function createArm(length: number, rate: Rates, color: Color, count?: number): A
 function createPen(color: Color): PenConfig[] {
   return [{
     id: "TODO",
-    nodeType: "PEN",
-    properties: { color }
+    type: "PEN",
+    parent: undefined,
+
+    color
   }];
-}
-
-export function loadLevel(levelId: number) {
-  levelCompleteStore.set(false);
-  const level = levels[levelId];
-
-  const output: Record<string, NodeConfig> =
-    Object.entries(level.pieces)
-      .reduce((acc, [id, nodeConfig]) => {
-        acc[id] = nodeConfig;
-        return acc;
-      }, {} as Record<string, NodeConfig>);
-
-  levelStore.set(levelId);
-  anchorIdStore.set(undefined);
-  selectionStore.set(undefined);
-  durationStore.set(level.duration);
-  nodesConfigStore.set(JSON.parse(JSON.stringify(output)));
 }
 
 const levels: Record<number, Level> = {
@@ -92,8 +80,8 @@ const levels: Record<number, Level> = {
     "Teamwork",
     3,
     [[{length: 4, rate: 1, phase: 0}, {length: 3, rate: 2, phase: 0}]],
-    createArm(4, 1, "red"),
     createArm(5, 1, "blue"),
+    createArm(4, 1, "red"),
     createPen("green")
   ),
 
@@ -211,7 +199,7 @@ const levels: Record<number, Level> = {
     5,
     [[{length: 3, rate: 1, phase: 0}, {length: 3, rate: 2, phase: 3}]],
     createArm(4, 1, "red"),
-    createArm(4, 1, "blue"),
+    createArm(4, 1, "blue", 3),
     createPen("green")
   ),
 
@@ -219,9 +207,9 @@ const levels: Record<number, Level> = {
     "Spectacle",
     5,
     [[{length: 3, rate: 1, phase: 3}, {length: 3, rate: 2, phase: 3}, {length: 4, rate: 4, phase: 3}]],
-    createArm(4, 1, "red"),
-    createArm(4, 1, "blue"),
-    createArm(5, 2, "orange"),
+    createArm(4, 1, "red", 3),
+    createArm(4, 1, "blue", 0),
+    createArm(5, 2, "orange", 0),
     createPen("green")
   ),
 
@@ -229,9 +217,9 @@ const levels: Record<number, Level> = {
     "Dice",
     5,
     [[{length: 3, rate: 1, phase: 2}, {length: 2, rate: 5, phase: 10}, {length: 1, rate: -3, phase: 0}]],
-    createArm(4, 1, "red"),
-    createArm(3, 4, "blue"),
-    createArm(2, -8, "orange"),
+    createArm(4, 1, "red", 2),
+    createArm(3, 4, "blue", 8),
+    createArm(2, -8, "orange", 4),
     createPen("green")
   ),
 
@@ -241,8 +229,8 @@ const levels: Record<number, Level> = {
     [[{length: 4, rate: 1, phase: 0}, {length: 4, rate: 2, phase: 0}, {length: 3, rate: 0, phase: 9}, {length: 1, rate: -5, phase: 6}]],
     createArm(5, 1, "red"),
     createArm(5, 1, "blue"),
-    createArm(4, -2, "orange"),
-    createArm(2, -5, "purple"),
+    createArm(4, -2, "orange", 9),
+    createArm(2, -5, "purple", 9),
     createPen("green")
   ),
 
@@ -251,19 +239,19 @@ const levels: Record<number, Level> = {
     5,
     [[{length: 3, rate: 1, phase: 0}, {length: 2, rate: 3, phase: 2}, {length: 3, rate: 2, phase: 6}]],
     createArm(4, 1, "red"),
-    createArm(4, 2, "blue"),
-    createArm(4, -1, "orange"),
+    createArm(4, 2, "blue", 2),
+    createArm(4, -1, "orange", 4),
     createPen("green")
   ),
 
   // 0-rate arms
   20: createLevel(
-    "A Stick",
+    "Just a Stick",
     5,
     [[{length: 3, rate: 1, phase: 0}, {length: 2, rate: 1, phase: 0}, {length: 3, rate: 0, phase: 4}]],
     createArm(4, 1, "red"),
     createArm(4, 0, "blue"),
-    createArm(4, -1, "orange"),
+    createArm(4, -1, "orange", 4),
     createPen("green")
   ),
 
@@ -278,7 +266,7 @@ const levels: Record<number, Level> = {
   ),
 
   22: createLevel(
-    "BFFs 4eva",
+    "Feeling Loopy",
     5,
     [[{length: 4, rate: 1, phase: 1}, {length: 2, rate: 3, phase: 2}, {length: 2, rate: 3, phase: 4}, {length: 2, rate: 5, phase: 5}]],
     createArm(5, 1, "red"),
@@ -338,30 +326,33 @@ const levels: Record<number, Level> = {
   ),
 }
 
-export const levelStore: Writable<number> = writable(1);
-export const levelNameStore: Readable<string> = derived(levelStore, level => levels[level].name);
+export const levelNumberStore: Writable<number> = writable(22);
+export const levelStore: Readable<Level> = derived(levelNumberStore, levelNumber => levels[levelNumber]);
 
-export const answerStore: Readable<WheelConfig[][]> = derived(levelStore, level => levels[level].answer);
-answerStore.subscribe(s => s.forEach(w => console.log("Answer", fromWheelConfigToString(w))))
+levelStore.subscribe(level => {
+  nodeLookupStore.set(clone(level.pieces));
+});
 
+export const durationStore: Readable<number> = derived(levelStore, level => level.duration);
+export const levelNameStore: Readable<string> = derived(levelStore, level => level.name);
+export const answerStore: Readable<WheelConfig[][]> = derived(levelStore, level => level.answer);
+// answerStore.subscribe(s => s.forEach(w => console.log("Answer", fromWheelConfigToString(w))))
 const normalisedAnswerStore: Readable<WheelConfig[][]> = derived(answerStore, answer => answer.map(normaliseWheels));
 
 export const answerCorrectStore: Readable<boolean> = derived(
   [normalisedAnswerStore, normalisedPenWheelConfigsStore],
-  ([actual, user]) => answersMatch(actual, user));
+  ([actual, user]) => Object.values(user).some(pens => answersMatch(actual, pens)));
 
-answerCorrectStore.subscribe(correct => {
-  if(correct) console.log("done");
-})
+// answerCorrectStore.subscribe(correct => {
+//   if(correct) console.log("done");
+// })
 
 export const levelCompleteStore: Writable<boolean> = writable(false);
-
-nodesConfigStore.subscribe(() => levelCompleteStore.set(false));
+nodeLookupStore.subscribe(() => levelCompleteStore.set(false));
 
 export const radiusStore: Readable<number> = derived(answerStore, answers => {
   const radii = answers.map(answer => answer
-    .map(wheel => wheel.length * 20)
-    .reduce((a,b) => a+b, 10));
-  console.log(radii);
-  return Math.max(100, ...radii) * 1.25;
+    .map(wheel => wheel.length)
+    .reduce((a,b) => a+b, 0));
+  return Math.max(0, ...radii);
 });

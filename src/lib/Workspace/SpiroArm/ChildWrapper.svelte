@@ -1,23 +1,15 @@
 <script lang="ts">
-import { nodesConfigStore } from "$lib/state";
-
   import type { NodeConfig } from "$lib/types";
-  import type { Writable } from "svelte/store";
   import Arm from "./Arm.svelte";
   import Pen from "./Pen.svelte";
 
-  export let id: string | undefined;
+  export let nodeConfig: NodeConfig;
+  export let anchorId: string;
   export let ghost: boolean = false;
-
-  let nodeConfig: NodeConfig | undefined;
-  $: nodeConfig = id === undefined ? undefined : $nodesConfigStore[id];
-
-  export let rotation: number = 0;
-  $: rotation = (nodeConfig?.placement?.phase ?? 0) / 12;
 </script>
 
-{#if id && nodeConfig?.nodeType === "ARM"}
-  <Arm {id} {ghost}/>
-{:else if id && nodeConfig?.nodeType === "PEN"}
-  <Pen {id} {ghost}/>
+{#if nodeConfig.type === "ARM"}
+  <Arm {nodeConfig} {anchorId} {ghost}/>
+{:else}
+  <Pen {nodeConfig} {anchorId} {ghost}/>
 {/if}

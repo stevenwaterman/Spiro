@@ -62,3 +62,7 @@ export function deriveUnwrapRecord<K extends string | number | symbol, V, INNER 
     set(record);
   }, {});
 }
+
+export function clone<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}

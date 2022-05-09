@@ -1,43 +1,91 @@
-import { fromWheelConfigToString, normaliseWheels } from "$lib/solution";
-import { anchorIdStore, nodesConfigStore } from "$lib/state";
-import type { NodeConfig, ArmConfig } from "$lib/types";
+import { normaliseWheels } from "$lib/solution";
+import { nodeLookupStore } from "$lib/state";
+import type { ArmConfig, NodeConfig, PenConfig } from "$lib/types";
 import { derived, type Readable } from "svelte/store";
 import type { PenWheelConfig, WheelConfig } from "./types";
 
-export const penWheelConfigsStore: Readable<PenWheelConfig[]> = derived(
-  [anchorIdStore, nodesConfigStore],
-  ([anchorId, nodeConfigLookup]) => {
-    if (anchorId === undefined) return [];
+export const penWheelConfigsStore: Readable<Record<string, PenWheelConfig[]>> = derived(nodeLookupStore, nodeLookup => {
+  const nodes: NodeConfig[] = Object.values(nodeLookup)
+  const pens: PenConfig[] = nodes.filter(node => node.type === "PEN") as PenConfig[];
+  const penWheelConfigs: PenWheelConfig[] = pens.map(pen => getPenWheelConfig(pen, nodeLookup));
+  return penWheelConfigs.reduce((acc, elem) => {
+    if(acc[elem.anchorId] === undefined) acc[elem.anchorId] = [];
+    acc[elem.anchorId].push(elem);
+    return acc;
+  }, {} as Record<string, PenWheelConfig[]>);
+});
 
-    const anchor: ArmConfig = nodeConfigLookup[anchorId] as ArmConfig;
+// penWheelConfigsStore.subscribe(s => console.log(s))
 
-    return Object.values(nodeConfigLookup)
-      .filter(conf => conf?.nodeType === "PEN" && conf.placement !== undefined)
-      .map(pen => pen?.placement?.path as number[])
-      .map(path => {
-        const wheelConfigs: WheelConfig[] = [];
-        let node: NodeConfig | undefined = anchor;
-        if (node === undefined) return null; // invalid state
+  //   if (anchorId === undefined) return [];
 
-        for (const pathLength of path) {
-          const prevPhase = wheelConfigs.length === 0 ? 0 : wheelConfigs[wheelConfigs.length - 1].phase;
-          const prevRate = wheelConfigs.length === 0 ? 0 : wheelConfigs[wheelConfigs.length - 1].rate;
-          wheelConfigs.push({
-            phase: prevPhase + (node.placement?.phase as number),
-            rate: prevRate + node.properties.rate,
-            length: pathLength,
-          });
-          const nextNode = node.placement?.children?.[pathLength] as string;
-          node = nodeConfigLookup[nextNode] as ArmConfig;
-          if (node === undefined) return null; // invalid state
-        }
+  //   const anchor: ArmConfig = nodeConfigLookup[anchorId] as ArmConfig;
 
-        // HACK this isn't actually an armconfig at this point, it's a penconfig, they just both have color here
-        return { wheels: wheelConfigs, color: node.properties.color, penId: node.id };
-      })
-      .filter(config => config !== null) as PenWheelConfig[];
-  });
+  //   return Object.values(nodeConfigLookup)
+  //     .filter(conf => conf?.nodeType === "PEN" && conf.placement !== undefined)
+  //     .map(pen => pen?.placement?.path as number[])
+  //     .map(path => {
+  //       const wheelConfigs: WheelConfig[] = [];
+  //       let node: NodeConfig | undefined = anchor;
+  //       if (node === undefined) return null; // invalid state
 
-export const normalisedPenWheelConfigsStore: Readable<WheelConfig[][]> = derived(penWheelConfigsStore, penWheels => penWheels.map(pen => normaliseWheels(pen.wheels)));
+  //       for (const pathLength of path) {
+  //         const prevPhase = wheelConfigs.length === 0 ? 0 : wheelConfigs[wheelConfigs.length - 1].phase;
+  //         const prevRate = wheelConfigs.length === 0 ? 0 : wheelConfigs[wheelConfigs.length - 1].rate;
+  //         wheelConfigs.push({
+  //           phase: prevPhase + (node.placement?.phase as number),
+  //           rate: prevRate + node.properties.rate,
+  //           length: pathLength,
+  //         });
+  //         const nextNode = node.placement?.children?.[pathLength] as string;
+  //         node = nodeConfigLookup[nextNode] as ArmConfig;
+  //         if (node === undefined) return null; // invalid state
+  //       }
 
-penWheelConfigsStore.subscribe(p => p.forEach(c => console.log(fromWheelConfigToString(c.wheels))));
+  //       // HACK this isn't actually an armconfig at this point, it's a penconfig, they just both have color here
+  //       return { wheels: wheelConfigs, color: node.properties.color, penId: node.id };
+  //     })
+  //     .filter(config => config !== null) as PenWheelConfig[];
+  // });
+
+function getPenWheelConfig(pen: PenConfig, nodeLookup: Record<string, NodeConfig>): PenWheelConfig {
+  const config = getWheelConfig(pen, nodeLookup);
+  return {
+    penId: pen.id,
+    anchorId: config.anchorId,
+    color: pen.color,
+    wheels: config.wheels
+  };
+}
+
+function getWheelConfig(nodeConfig: NodeConfig, nodeLookup: Record<string, NodeConfig>): {wheels: WheelConfig[], anchorId: string} {
+  if (nodeConfig.parent === undefined) return {wheels: [], anchorId: nodeConfig.id};
+
+  const parentConfig = nodeLookup[nodeConfig.parent.id] as ArmConfig;
+  const newWheel: WheelConfig = { 
+    length: nodeConfig.parent.idx,
+    rate: parentConfig.rate,
+    phase: parentConfig.phase
+  };
+
+  const config = getWheelConfig(parentConfig, nodeLookup);
+  const wheels = config.wheels;
+  
+  if (wheels.length > 0) {
+    const lastWheel = wheels[wheels.length - 1];
+    newWheel.rate += lastWheel.rate;
+    newWheel.phase += lastWheel.phase;
+  }
+
+  wheels.push(newWheel);
+  return config;
+}
+
+export const normalisedPenWheelConfigsStore: Readable<Record<string, WheelConfig[][]>> = derived(penWheelConfigsStore, anchors => {
+  const output: Record<string, WheelConfig[][]> = {};
+  Object.entries(anchors).forEach(([id, configs]) => {
+    output[id] = configs.map(config => normaliseWheels(config.wheels));
+  })
+  return output;
+});
+// penWheelConfigsStore.subscribe(p => p.forEach(c => console.log(fromWheelConfigToString(c.wheels))));

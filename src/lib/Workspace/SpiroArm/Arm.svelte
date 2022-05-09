@@ -1,19 +1,25 @@
 <script lang="ts">
-  import type { ArmConfig } from "$lib/types";
-  import type { Writable } from "svelte/store";
-  import { durationStore, fraction, nodesConfigStore, removePiece, selectionStore, showStore } from "../../state";
+  import { durationStore } from "$lib/levels";
+  import type { ArmConfig, NodeConfig } from "$lib/types";
+  import { fraction, nodeLookupStore, removePiece, selectionStore, showStore } from "../../state";
   import Node from "./Node.svelte";
 
-  export let id: string;
+  export let nodeConfig: ArmConfig;
+  export let anchorId: string;
   export let ghost: boolean;
 
-  let nodeConfig: ArmConfig;
-  $: nodeConfig = $nodesConfigStore[id] as ArmConfig;
+  let children: Record<number, NodeConfig>;
+  $: children = Object.values($nodeLookupStore)
+    .filter(child => child.parent?.id === nodeConfig.id)
+    .reduce((acc, elem) => {
+      acc[elem.parent?.idx as number] = elem;
+      return acc;
+    }, {} as Record<number, NodeConfig>);
 
   let arm: HTMLDivElement | undefined;
 
   let rotations: number;
-  $: rotations = nodeConfig.properties.rate * fraction;
+  $: rotations = nodeConfig.rate * fraction;
 
   let resetting: boolean = false;
 
@@ -32,19 +38,20 @@
   }
 
   function rightClick() {
-    removePiece(id);
+    if (nodeConfig.id === "A") return;
+
+    removePiece(nodeConfig.id);
   }
 
   function leftClick() {
-    removePiece(id);
-    selectionStore.set(id);
+    if (nodeConfig.id === "A") return;
+
+    removePiece(nodeConfig.id);
+    selectionStore.set(nodeConfig.id);
   }
 
-  let length: number;
-  $: length = nodeConfig.properties.length;
-
   let maxIdx: number;
-  $: maxIdx = length - 1;
+  $: maxIdx = nodeConfig.length - 1;
 </script>
 
 <style>
@@ -96,6 +103,8 @@
     font-weight: bold;
     transform: translate(-50%, -50%);
     font-size: 16px;
+
+    user-select: none;
   }
 </style>
 
@@ -109,15 +118,15 @@
   style={`
     --rotations: ${rotations};
     --duration: ${$durationStore};
-    background-color: var(--light${nodeConfig.properties.color});
+    background-color: var(--light${nodeConfig.color});
   `}
 
   on:contextmenu|preventDefault|stopPropagation={rightClick}
   on:click|stopPropagation={leftClick}
 >
-  {#each {length} as _, i}
-    <Node childId={nodeConfig?.placement?.children?.[maxIdx - i]} idx={maxIdx - i} parentConfig={nodeConfig} />
+  {#each {length: nodeConfig.length} as _, i}
+    <Node parentConfig={nodeConfig} childConfig={children[maxIdx - i]} idx={maxIdx - i} {anchorId} {ghost} />
   {/each}
 
-  <span class="speed" style={`color: var(--${nodeConfig.properties.color});`}>{nodeConfig.properties.rate}</span>
+  <span class="speed" style={`color: var(--${nodeConfig.color});`}>{nodeConfig.rate}</span>
 </div>

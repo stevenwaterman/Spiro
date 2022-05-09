@@ -1,15 +1,22 @@
 <script lang="ts">
-  import SpirographController from "./SpiroLine/SpirographController.svelte";
+  // import SpirographController from "./SpiroLine/SpirographController.svelte";
   import Anchor from "./SpiroArm/Anchor.svelte";
-  import { levelCompleteStore, levelNameStore, levelStore, radiusStore } from "$lib/levels";
+  import { levelCompleteStore, levelNameStore, levelNumberStore, radiusStore } from "$lib/levels";
+  import type { NodeConfig } from "$lib/types";
+  import { nodeLookupStore, selectionStore } from "$lib/state";
 
   let width: number;
   let height: number;
   let maxAllowedRadius: number;
-  $: maxAllowedRadius = Math.min(width, height) / 2;
+  $: maxAllowedRadius = Math.min(width, height) / 40;
 
   let scale: number;
   $: scale = Math.min(10, maxAllowedRadius / $radiusStore);
+
+  let anchors: NodeConfig[];
+  $: anchors = Object.values($nodeLookupStore)
+    .filter(conf => conf.parent === undefined)
+    .filter(conf => conf.id !== "A");
 </script>
 
 <style>
@@ -18,6 +25,11 @@
     position: relative;
     height: 100%;
     width: 100%;
+
+    flex-grow: 1;
+    flex-basis: 0;
+
+    transition: flex-grow 1s;
   }
 
   .center {
@@ -53,10 +65,6 @@
     transition-duration: 1s;
   }
 
-  .hide {
-    opacity: 0;
-  }
-
   .level {
     position: fixed;
     top: 8px;
@@ -67,19 +75,35 @@
     opacity: 0.5;
     filter: blur(1.5px);
   }
+
+  .row {
+    display: flex;
+    flex-direction: column;
+
+    height: 100%;
+    /* width: var(--radius); */
+    width: fit-content;
+    overflow-y: scroll;
+
+    align-items: center;
+  }
 </style>
 
 <div class="level">
-  {$levelStore} - {$levelNameStore}
+  {$levelNumberStore} - {$levelNameStore}
 </div>
 
-{#key $levelStore}
+{#key $levelNumberStore}
+  <div class="row" style={`--radius: ${$radiusStore}px;`}>
+    {#each anchors as anchor (anchor.id)}
+      <Anchor nodeConfig={anchor}/>
+    {/each}
+  </div>
+
   <div class="container" bind:clientHeight={height} bind:clientWidth={width}>
     <div class="center">
       <div class="scale" style={`--scale: ${scale}`}>
-        <div class="dot" class:hide={$levelCompleteStore}/>
-        <SpirographController/>
-        <Anchor/>
+        <Anchor nodeConfig={$nodeLookupStore["A"]} primary/>
       </div>
     </div>
   </div>

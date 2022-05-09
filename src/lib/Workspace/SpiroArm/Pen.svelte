@@ -1,20 +1,19 @@
 <script lang="ts">
-  import { nodesConfigStore, removePiece, selectionStore } from "$lib/state";
+  import { removePiece, selectionStore } from "$lib/state";
   import type { PenConfig } from "$lib/types";
   
-  export let id: string;
+  export let nodeConfig: PenConfig;
+  export let anchorId: string;
   export let ghost: boolean;
 
-  let penConfig: PenConfig;
-  $: penConfig = $nodesConfigStore[id] as PenConfig;
 
   function rightClick() {
-    removePiece(id);
+    removePiece(nodeConfig.id);
   }
 
   function leftClick() {
-    removePiece(id);
-    selectionStore.set(id);
+    removePiece(nodeConfig.id);
+    selectionStore.set(nodeConfig.id);
   }
 </script>
 
@@ -42,7 +41,7 @@
 <div
   class="pen"
   class:ghost
-  style={`background-color: var(--${penConfig.properties.color})`}
+  style={`background-color: var(--${nodeConfig.color})`}
   on:contextmenu|preventDefault|stopPropagation={rightClick}
   on:click|stopPropagation={leftClick}
 />

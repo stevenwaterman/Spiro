@@ -1,9 +1,5 @@
 <script lang="ts">
-  import Controls from "$lib/Controls/Controls.svelte";
-  import { loadLevel } from "$lib/levels";
   import Visualisation from "$lib/Workspace/Visualisation.svelte";
-
-  loadLevel(24);
 </script>
 
 <style>
@@ -20,6 +16,5 @@
 <!-- <svelte:body on:contextmenu|preventDefault/> -->
 
 <div class="row">
-  <Controls/>
   <Visualisation/>
 </div>
