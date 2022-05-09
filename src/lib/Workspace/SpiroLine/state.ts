@@ -1,4 +1,4 @@
-import { normaliseWheels } from "$lib/solution";
+import { fromWheelConfigToString, normaliseWheels } from "$lib/solution";
 import { anchorIdStore, nodesConfigStore } from "$lib/state";
 import type { NodeConfig, ArmConfig } from "$lib/types";
 import { deriveUnwrapRecord } from "$lib/utils";
@@ -24,7 +24,7 @@ export const penWheelConfigsStore: Readable<PenWheelConfig[]> = derived(
           const prevPhase = wheelConfigs.length === 0 ? 0 : wheelConfigs[wheelConfigs.length - 1].phase;
           const prevRate = wheelConfigs.length === 0 ? 0 : wheelConfigs[wheelConfigs.length - 1].rate;
           wheelConfigs.push({
-            phase: prevPhase + (node.placement?.phase as number) * 2 * Math.PI,
+            phase: prevPhase + (node.placement?.phase as number),
             rate: prevRate + node.properties.rate,
             length: pathLength,
           });
@@ -40,3 +40,5 @@ export const penWheelConfigsStore: Readable<PenWheelConfig[]> = derived(
   });
 
 export const normalisedPenWheelConfigsStore: Readable<WheelConfig[][]> = derived(penWheelConfigsStore, penWheels => penWheels.map(pen => normaliseWheels(pen.wheels)));
+
+normalisedPenWheelConfigsStore.subscribe(s => s.map(w => console.log(fromWheelConfigToString(w))));

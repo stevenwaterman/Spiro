@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { NodeConfig } from "$lib/types";
   import type { Writable } from "svelte/store";
-  import { anchorIdStore, duration, nodesConfigStore } from "../../state";
+  import { anchorIdStore, durationStore, nodesConfigStore } from "../../state";
   import ChildWrapper from "./ChildWrapper.svelte";
   import {levelCompleteStore} from "$lib/levels";
 
@@ -33,6 +33,6 @@
   }
 </style>
 
-<div class="anchor" class:hide={$levelCompleteStore} style={`--duration: ${duration}; transform: rotate(${rotation ?? 0}turn);`}>
+<div class="anchor" class:hide={$levelCompleteStore} style={`--duration: ${$durationStore}; transform: rotate(${rotation ?? 0}turn);`}>
   <ChildWrapper id={$anchorIdStore}/>
 </div>

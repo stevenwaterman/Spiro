@@ -34,9 +34,9 @@ export function wheelsMatch(a: WheelConfig, b: WheelConfig): boolean {
 //   return normaliseWheels(wheels);
 // }
 
-function fromWheelConfigToString(config: WheelConfig[]): string {
+export function fromWheelConfigToString(config: WheelConfig[]): string {
   return config
-    .map(wheel => `${wheel.length}x${wheel.rate}+${wheel.phase / (2 * Math.PI)}`)
+    .map(wheel => `${wheel.length}x${wheel.rate}+${wheel.phase}`)
     .join(" ");
 }
 

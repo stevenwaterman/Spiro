@@ -3,7 +3,7 @@ import { answerCorrectStore, levelCompleteStore, levelStore } from "$lib/levels"
 
   import { linear } from "svelte/easing";
   import { fade } from "svelte/transition";
-  import { duration, fraction, showStore } from "../../state";
+  import { durationStore, fraction, showStore } from "../../state";
   import type { PenWheelConfig } from "./types";
 
   export let idx: number;
@@ -27,7 +27,7 @@ import { answerCorrectStore, levelCompleteStore, levelStore } from "$lib/levels"
     let y = 0;
 
     config.wheels.forEach(wheel => {
-      const phase = wheel.phase + t * wheel.rate;
+      const phase = wheel.phase * 2 * Math.PI + t * wheel.rate;
       x += Math.cos(phase) * wheel.length;
       y += Math.sin(phase) * wheel.length;
     });
@@ -84,7 +84,7 @@ import { answerCorrectStore, levelCompleteStore, levelStore } from "$lib/levels"
 
     return {
         delay: 0,
-        duration: duration * 1000,
+        duration: $durationStore * 1000,
         easing: linear,
         css: getStyleAt
     };
@@ -121,8 +121,8 @@ import { answerCorrectStore, levelCompleteStore, levelStore } from "$lib/levels"
     {points}
     style={`stroke: var(--${config.color}); filter: drop-shadow(0px 0px 10px var(--light${config.color}));`}
     class:levelComplete={$levelCompleteStore}
-    in:draw="{{duration: duration * 1000}}"
-    out:fade="{{duration: 100}}"
+    in:draw="{{}}"
+    out:fade="{{duration: $durationStore * 1000}}"
     on:introend={animationDone}
   />
 {/if}

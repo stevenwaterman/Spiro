@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ArmConfig } from "$lib/types";
   import type { Writable } from "svelte/store";
-  import { duration, fraction, nodesConfigStore, removePiece, selectionStore, showStore } from "../../state";
+  import { durationStore, fraction, nodesConfigStore, removePiece, selectionStore, showStore } from "../../state";
   import Node from "./Node.svelte";
 
   export let id: string;
@@ -108,7 +108,7 @@
 
   style={`
     --rotations: ${rotations};
-    --duration: ${duration};
+    --duration: ${$durationStore};
     background-color: var(--light${nodeConfig.properties.color});
   `}
 

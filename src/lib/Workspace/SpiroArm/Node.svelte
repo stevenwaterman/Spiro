@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { placeSelection, selectionStore } from "$lib/state";
+  import { nodesConfigStore, placeSelection, selectionStore } from "$lib/state";
   import type { ArmConfig, Placement } from "$lib/types";
   import type { Writable } from "svelte/store";
   import ChildWrapper from "./ChildWrapper.svelte";
@@ -32,13 +32,15 @@
   }
 
   function scroll(event: WheelEvent) {
+    const placement: Placement = parentConfig.placement as Placement;
     if (event.deltaY > 0) {
-      const placement = parentConfig.placement as Placement;
       placement.phase = (placement.phase + 0.125) % 1;
+      nodesConfigStore.set($nodesConfigStore);
     } else if (event.deltaY < 0) {
-      const placement = parentConfig.placement as Placement;
       placement.phase = (placement.phase - 0.125) % 1;
+      nodesConfigStore.set($nodesConfigStore);
     }
+    
   }
 
   let rotation: number | undefined = undefined;

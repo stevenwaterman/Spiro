@@ -9,7 +9,7 @@ nodesConfigStore.subscribe(s => nodesConfig = s);
 export const anchorIdStore: Writable<string | undefined> = writable(undefined);
 export const selectionStore: Writable<string | undefined> = writable(undefined);
 
-export const duration = 5;
+export const durationStore: Writable<number> = writable(3);
 export const fraction = 1;
 export const showStore = derived(selectionStore, selection => selection === undefined);
 

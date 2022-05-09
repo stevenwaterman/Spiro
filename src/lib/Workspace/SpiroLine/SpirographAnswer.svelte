@@ -22,7 +22,7 @@
     let y = 0;
 
     wheels.forEach(wheel => {
-      const phase = wheel.phase + t * wheel.rate;
+      const phase = wheel.phase * 2 * Math.PI  + t * wheel.rate;
       x += Math.cos(phase) * wheel.length;
       y += Math.sin(phase) * wheel.length;
     });

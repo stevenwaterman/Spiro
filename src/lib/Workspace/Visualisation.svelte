@@ -1,7 +1,7 @@
 <script lang="ts">
   import SpirographController from "./SpiroLine/SpirographController.svelte";
   import Anchor from "./SpiroArm/Anchor.svelte";
-  import { levelCompleteStore, levelStore, radiusStore } from "$lib/levels";
+  import { levelCompleteStore, levelNameStore, levelStore, radiusStore } from "$lib/levels";
 
   let width: number;
   let height: number;
@@ -9,7 +9,7 @@
   $: maxAllowedRadius = Math.min(width, height) / 2;
 
   let scale: number;
-  $: scale = Math.min(10, 0.9 * maxAllowedRadius / $radiusStore);
+  $: scale = Math.min(10, 0.8 * maxAllowedRadius / $radiusStore);
 </script>
 
 <style>
@@ -56,7 +56,22 @@
   .hide {
     opacity: 0;
   }
+
+  .level {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    color: var(--white);
+    font-weight: bold;
+    font-size: 3vw;
+    opacity: 0.5;
+    filter: blur(1.5px);
+  }
 </style>
+
+<div class="level">
+  {$levelStore} - {$levelNameStore}
+</div>
 
 {#key $levelStore}
   <div class="container" bind:clientHeight={height} bind:clientWidth={width}>
