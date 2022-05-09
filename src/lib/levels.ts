@@ -1,6 +1,5 @@
-import { createEventDispatcher } from "svelte";
 import { derived, writable, type Readable, type Writable } from "svelte/store";
-import { answersMatch, fromWheelConfigToString, normaliseWheels } from "./solution";
+import { answersMatch, fromStringToWheelConfig, fromWheelConfigToString, normaliseWheels } from "./solution";
 import { anchorIdStore, durationStore, nodesConfigStore, selectionStore } from "./state";
 import type { ArmConfig, Color, NodeConfig, PenConfig, Rates } from "./types";
 import { normalisedPenWheelConfigsStore } from "./Workspace/SpiroLine/state";
@@ -21,12 +20,10 @@ function createLevel(name: string, duration: number, answer: WheelConfig[][], ..
     pieces[node.id] = node;
   });
 
-  const normalisedAnswer: WheelConfig[][] = answer.map(conf => normaliseWheels(conf));
-
   return {
     name,
     duration,
-    answer: normalisedAnswer,
+    answer,
     pieces
   };
 }
@@ -239,10 +236,8 @@ const levels: Record<number, Level> = {
   ),
 
   18: createLevel(
-    "Dice",
+    "Subscribe",
     5,
-    //4x-2+2 4x-1+1 3x0+-3 1x5+-11
-    //4x-2+6 4x-1+3 3x0+9 1x5+-9
     [[{length: 4, rate: 1, phase: 0}, {length: 4, rate: 2, phase: 0}, {length: 3, rate: 0, phase: 9}, {length: 1, rate: -5, phase: 6}]],
     createArm(5, 1, "red"),
     createArm(5, 1, "blue"),
@@ -261,10 +256,71 @@ const levels: Record<number, Level> = {
     createPen("green")
   ),
 
+  // 0-rate arms
+  20: createLevel(
+    "A Stick",
+    5,
+    [[{length: 3, rate: 1, phase: 0}, {length: 2, rate: 1, phase: 0}, {length: 3, rate: 0, phase: 4}]],
+    createArm(4, 1, "red"),
+    createArm(4, 0, "blue"),
+    createArm(4, -1, "orange"),
+    createPen("green")
+  ),
+
+  21: createLevel(
+    "Percussion",
+    3,
+    [[{length: 4, rate: 1, phase: 5}, {length: 3, rate: -2, phase: 6}, {length: 2, rate: -2, phase: 1}]],
+    createArm(5, 1, "red"),
+    createArm(4, -3, "blue"),
+    createArm(3, 0, "orange"),
+    createPen("green")
+  ),
+
+  22: createLevel(
+    "BFFs 4eva",
+    5,
+    [[{length: 4, rate: 1, phase: 1}, {length: 2, rate: 3, phase: 2}, {length: 2, rate: 3, phase: 4}, {length: 2, rate: 5, phase: 5}]],
+    createArm(5, 1, "red"),
+    createArm(3, 2, "orange"),
+    createArm(3, 0, "blue"),
+    createArm(3, 2, "purple"),
+    createPen("green")
+  ),
+
+  23: createLevel(
+    "Hug Bud",
+    5,
+    [fromStringToWheelConfig("1x1+-2 3x-1+2 1x-3+0 2x-2+1")],
+    createArm(2, 1, "red"),
+    createArm(3, -2, "orange", 2),
+    createArm(2, 0, "blue"),
+    createArm(3, 1, "purple"),
+    createPen("green")
+  ),
+
+  24: createLevel(
+    "Hug Bud",
+    5,
+    [fromStringToWheelConfig("5x1+0 3x1+0 3x-7+2 2x-7+1 1x17+3")],
+    createArm(6, 1, "red"),
+    createArm(4, -8, "orange"),
+    createArm(2, 24, "blue"),
+    createArm(4, 0, "purple"),
+    createArm(3, 0, "purple"),
+    createPen("green")
+  ),
+
+  // You don't need to use all of them
+  25: createLevel(
+    "",
+    5,
+    []
+  ),
   
 
   // Multiple rotations
-  100: createLevel(
+  30: createLevel(
     "Twinkle",
     5,
     [[{length: 5, rate: 2, phase: 0}, {length: 2, rate: 0, phase: 0}, {length: 2, rate: -3, phase: 0}]],
@@ -274,9 +330,12 @@ const levels: Record<number, Level> = {
     createPen("green")
   ),
 
-  // 0-rate arms
-  // You don't need to use all of them
   // Multiple pens
+  35: createLevel(
+    "",
+    5,
+    []
+  ),
 }
 
 export const levelStore: Writable<number> = writable(1);
@@ -285,8 +344,10 @@ export const levelNameStore: Readable<string> = derived(levelStore, level => lev
 export const answerStore: Readable<WheelConfig[][]> = derived(levelStore, level => levels[level].answer);
 answerStore.subscribe(s => s.forEach(w => console.log("Answer", fromWheelConfigToString(w))))
 
+const normalisedAnswerStore: Readable<WheelConfig[][]> = derived(answerStore, answer => answer.map(normaliseWheels));
+
 export const answerCorrectStore: Readable<boolean> = derived(
-  [answerStore, normalisedPenWheelConfigsStore],
+  [normalisedAnswerStore, normalisedPenWheelConfigsStore],
   ([actual, user]) => answersMatch(actual, user));
 
 answerCorrectStore.subscribe(correct => {
@@ -301,5 +362,6 @@ export const radiusStore: Readable<number> = derived(answerStore, answers => {
   const radii = answers.map(answer => answer
     .map(wheel => wheel.length * 20)
     .reduce((a,b) => a+b, 10));
+  console.log(radii);
   return Math.max(100, ...radii) * 1.25;
 });

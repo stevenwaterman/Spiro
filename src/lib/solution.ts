@@ -20,19 +20,19 @@ export function wheelsMatch(a: WheelConfig, b: WheelConfig): boolean {
   return lengthMatches && rateMatches && phaseMatches;
 }
 
-// export function fromStringToWheelConfig(config: string): WheelConfig[] {
-//   const wheels = config.split(" ").filter(s => s.length > 0).map(arm => {
-//     const [lengthStr, rateAndPhaseStr] = arm.split("x");
-//     const length = Number.parseFloat(lengthStr);
+export function fromStringToWheelConfig(config: string): WheelConfig[] {
+  const wheels = config.split(" ").filter(s => s.length > 0).map(arm => {
+    const [lengthStr, rateAndPhaseStr] = arm.split("x");
+    const length = Number.parseFloat(lengthStr);
 
-//     const [rateStr, phaseStr] = rateAndPhaseStr.split("+");
-//     const rate = Number.parseFloat(rateStr);
-//     const phase = Number.parseFloat(phaseStr) * 2 * Math.PI;
+    const [rateStr, phaseStr] = rateAndPhaseStr.split("+");
+    const rate = Number.parseFloat(rateStr);
+    const phase = Number.parseFloat(phaseStr);
 
-//     return { length, rate, phase };
-//   });
-//   return normaliseWheels(wheels);
-// }
+    return { length, rate, phase };
+  });
+  return normaliseWheels(wheels);
+}
 
 export function fromWheelConfigToString(config: WheelConfig[]): string {
   return config
@@ -83,11 +83,11 @@ function combineMultipleSameRate(configs: WheelConfig[]): WheelConfig {
 function combineSameRate(a: WheelConfig, b: WheelConfig): WheelConfig {
   const rate = a.rate;
 
-  const aAngle = a.phase * 2 * Math.PI;
+  const aAngle = a.phase * 2 * Math.PI / 12;
   const aDeltaX = Math.cos(aAngle) * a.length;
   const aDeltaY = Math.sin(aAngle) * a.length;
 
-  const bAngle = b.phase * 2 * Math.PI;
+  const bAngle = b.phase * 2 * Math.PI / 12;
   const bDeltaX = Math.cos(bAngle) * b.length;
   const bDeltaY = Math.sin(bAngle) * b.length;
 
@@ -95,7 +95,7 @@ function combineSameRate(a: WheelConfig, b: WheelConfig): WheelConfig {
   const deltaY = aDeltaY + bDeltaY;
   const length = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
   const angle = Math.acos(deltaX / length);
-  const phase = angle / (2 * Math.PI);
+  const phase = 12 * angle / (2 * Math.PI);
   return { length, phase, rate };
 }
 
@@ -121,7 +121,13 @@ function normalisePhase(normalisedRates: WheelConfig[]): WheelConfig[] {
   const phaseTotals: number[] = [];
 
   for(let i = 0; i < 12; i++) {
-    const option = phaseGTZero.map(wheel => ({...wheel, phase: (wheel.phase + (wheel.rate * i)) % 12}));
+    const option = phaseGTZero.map(wheel => {
+      const oldPhase = wheel.phase;
+      const phaseChange = wheel.rate * 12;
+      const newPhase = oldPhase + phaseChange;
+      const moduloPhase = ((newPhase % 12) + 12) % 12;
+      return {...wheel, phase: moduloPhase};
+    });
     const phaseTotal = option.map(wheel => wheel.phase).reduce((a,b) => a+b, 0);
     
     phaseOptions.push(option);

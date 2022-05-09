@@ -3,7 +3,7 @@
   import { loadLevel } from "$lib/levels";
   import Visualisation from "$lib/Workspace/Visualisation.svelte";
 
-  loadLevel(18);
+  loadLevel(24);
 </script>
 
 <style>

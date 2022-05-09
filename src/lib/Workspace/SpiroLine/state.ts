@@ -40,4 +40,4 @@ export const penWheelConfigsStore: Readable<PenWheelConfig[]> = derived(
 
 export const normalisedPenWheelConfigsStore: Readable<WheelConfig[][]> = derived(penWheelConfigsStore, penWheels => penWheels.map(pen => normaliseWheels(pen.wheels)));
 
-normalisedPenWheelConfigsStore.subscribe(s => s.map(w => console.log(fromWheelConfigToString(w))));
+penWheelConfigsStore.subscribe(p => p.forEach(c => console.log(fromWheelConfigToString(c.wheels))));
