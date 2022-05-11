@@ -63,14 +63,15 @@ export function normaliseWheels(wheels: WheelConfig[]): WheelConfig[] {
   const rateGCD = rateList.reduce(gcd, 1);
   const normalisedRates = combinedRates.map(config => ({ ...config, rate: config.rate / rateGCD }));
 
-  const normalisedPhase = normalisePhase(normalisedRates)
+  const normalisedPhase = normalisePhase(normalisedRates);
   const normalString = fromWheelConfigToString(normalisedPhase);
 
   const invertRate = normalisedPhase.map(config => ({...config, rate: -config.rate}));
   invertRate.sort((a, b) => a.rate - b.rate);
-  const invertString = fromWheelConfigToString(invertRate);
+  const invertNormalised = normalisePhase(invertRate);
+  const invertString = fromWheelConfigToString(invertNormalised);
 
-  return invertString > normalString ? invertRate : normalisedPhase;
+  return invertString > normalString ? invertNormalised : normalisedPhase;
 }
 
 function combineMultipleSameRate(configs: WheelConfig[]): WheelConfig {
@@ -131,7 +132,7 @@ function normalisePhase(normalisedRates: WheelConfig[]): WheelConfig[] {
   for(let i = 0; i < 12; i++) {
     const option = phaseGTZero.map(wheel => {
       const oldPhase = wheel.phase;
-      const phaseChange = wheel.rate * 12;
+      const phaseChange = wheel.rate * i;
       const newPhase = oldPhase + phaseChange;
       const moduloPhase = ((newPhase % 12) + 12) % 12;
       return {...wheel, phase: moduloPhase};
@@ -141,6 +142,7 @@ function normalisePhase(normalisedRates: WheelConfig[]): WheelConfig[] {
     phaseOptions.push(option);
     phaseTotals.push(phaseTotal);
   }
+  console.log(phaseOptions)
 
   const minPhaseTotal: number = Math.min(...phaseTotals);
   const idx = phaseTotals.indexOf(minPhaseTotal);
