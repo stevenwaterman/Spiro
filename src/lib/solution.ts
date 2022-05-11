@@ -142,7 +142,7 @@ function normalisePhase(normalisedRates: WheelConfig[]): WheelConfig[] {
     phaseOptions.push(option);
     phaseTotals.push(phaseTotal);
   }
-  console.log(phaseOptions)
+  // console.log(phaseOptions)
 
   const minPhaseTotal: number = Math.min(...phaseTotals);
   const idx = phaseTotals.indexOf(minPhaseTotal);

@@ -87,4 +87,4 @@ export const normalisedPenWheelConfigsStore: Readable<Record<string, WheelConfig
   })
   return output;
 });
-normalisedPenWheelConfigsStore.subscribe(p => Object.values(p).flat().filter(x => x !== undefined).filter(c => c.length > 0).forEach(c => console.log(fromWheelConfigToString(c))));
+// normalisedPenWheelConfigsStore.subscribe(p => Object.values(p).flat().filter(x => x !== undefined).filter(c => c.length > 0).forEach(c => console.log(fromWheelConfigToString(c))));

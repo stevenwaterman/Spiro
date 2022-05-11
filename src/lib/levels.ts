@@ -342,7 +342,7 @@ const levels: Record<number, Level> = {
   ),
 }
 
-export const levelNumberStore: Writable<number> = writable(21);
+export const levelNumberStore: Writable<number> = writable(1);
 levelNumberStore.subscribe(() => showStore.set(false));
 
 export const levelStore: Readable<Level> = derived(levelNumberStore, levelNumber => levels[levelNumber]);
@@ -356,7 +356,7 @@ export const levelNameStore: Readable<string> = derived(levelStore, level => lev
 export const answerStore: Readable<WheelConfig[][]> = derived(levelStore, level => level.answer);
 // answerStore.subscribe(s => s.forEach(w => console.log("Answer", fromWheelConfigToString(w))))
 export const normalisedAnswerStore: Readable<WheelConfig[][]> = derived(answerStore, answer => answer.map(normaliseWheels));
-normalisedAnswerStore.subscribe(answer => console.log(fromWheelConfigToString(answer[0])))
+// normalisedAnswerStore.subscribe(answer => console.log(fromWheelConfigToString(answer[0])))
 
 export const answerCorrectStore: Readable<boolean> = derived(
   [normalisedAnswerStore, normalisedPenWheelConfigsStore],
