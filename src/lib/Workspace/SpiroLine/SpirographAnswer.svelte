@@ -11,8 +11,6 @@
   let pointCount: number;
   $: pointCount = Math.round(lengthEstimate * 200 / $radiusStore);
 
-  // $: console.log(pointCount, "points")
-
   let points: string;
   $: points = getPoints(config);
 

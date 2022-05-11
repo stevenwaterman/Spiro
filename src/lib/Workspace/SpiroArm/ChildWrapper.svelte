@@ -11,5 +11,5 @@
 {#if isArm(nodeConfig)}
   <Arm {nodeConfig} {anchorId} {parentPhase}/>
 {:else if isPen(nodeConfig)}
-  <Pen {nodeConfig} {anchorId}/>
+  <Pen {nodeConfig} />
 {/if}

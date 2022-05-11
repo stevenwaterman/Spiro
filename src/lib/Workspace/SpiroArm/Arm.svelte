@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { durationStore } from "$lib/levels";
   import { isParentPos, type ArmConfig, type NodeConfigPositioned } from "$lib/types";
   import { fraction, nodeLookupStore, removePiece, selectionStore, showStore, updateSecondaryLocation } from "../../state";
   import Node from "./Node.svelte";
@@ -106,7 +105,6 @@
 
   style={`
     --rotations: ${rotations};
-    --duration: ${$durationStore};
     background-color: var(--light${nodeConfig.color});
   `}
 

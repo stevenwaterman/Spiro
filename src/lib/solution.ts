@@ -104,7 +104,6 @@ function combineSameRate(a: WheelConfig, b: WheelConfig): WheelConfig {
   const phase = 12 * angle;
 
   const output = { length, phase, rate };
-  // console.log({deltaX, deltaY, length, angle})
   return output;
 }
 
@@ -142,7 +141,6 @@ function normalisePhase(normalisedRates: WheelConfig[]): WheelConfig[] {
     phaseOptions.push(option);
     phaseTotals.push(phaseTotal);
   }
-  // console.log(phaseOptions)
 
   const minPhaseTotal: number = Math.min(...phaseTotals);
   const idx = phaseTotals.indexOf(minPhaseTotal);

@@ -1,15 +1,12 @@
 <script lang="ts">
-import { durationStore } from "$lib/levels";
-
   import { fraction, removePiece, selectionStore, showStore, updateSecondaryLocation } from "$lib/state";
   import type { PenConfig } from "$lib/types";
   import { faPen } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
   import { penWheelConfigsStore } from "../SpiroLine/state";
-  import type { PenWheelConfig, WheelConfig } from "../SpiroLine/types";
+  import type { WheelConfig } from "../SpiroLine/types";
   
   export let nodeConfig: PenConfig;
-  export let anchorId: string;
 
   function leftClick(event: MouseEvent) {
     removePiece(nodeConfig.id);
@@ -91,7 +88,6 @@ import { durationStore } from "$lib/levels";
     color: var(--light${nodeConfig.color});
     background-color: var(--${nodeConfig.color});
     --rotations: ${rotations};
-    --duration: ${$durationStore};
   `}
   on:click|stopPropagation={leftClick}
 >

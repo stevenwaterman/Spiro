@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { nodeLookupStore, placeSelection, selectedAnchorStore, selectionStore } from "$lib/state";
+  import { placeSelection, selectedAnchorStore, selectionStore } from "$lib/state";
   import { isArm, type ArmConfig, type NodeConfig } from "$lib/types";
   import ChildWrapper from "./ChildWrapper.svelte";
 
@@ -26,18 +26,6 @@
     placeSelection(parentConfig.id, $selectionStore, idx);
     selectionStore.set(undefined);
   }
-
-  // function scroll(event: WheelEvent) {
-  //   const placement: Placement = parentConfig.placement as Placement;
-  //   if (event.deltaY > 0) {
-  //     placement.phase = (placement.phase + 1) % 12;
-  //     nodesConfigStore.set($nodesConfigStore);
-  //   } else if (event.deltaY < 0) {
-  //     placement.phase = (placement.phase - 1) % 12;
-  //     nodesConfigStore.set($nodesConfigStore);
-  //   }
-    
-  // }
 
   let phase: number;
   $: phase = isArm(childConfig) ? childConfig.phase / 12 : 0;

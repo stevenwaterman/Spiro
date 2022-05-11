@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { answerCorrectStore, answerStore, durationStore, levelCompleteStore, radiusStore } from "$lib/levels";
+  import { answerCorrectStore, durationStore, levelCompleteStore, radiusStore } from "$lib/levels";
   import { linear } from "svelte/easing";
   import { fraction, showStore } from "../../state";
   import type { PenWheelConfig } from "./types";
@@ -12,7 +12,7 @@
   $: lengthEstimate = config.wheels.map(wheel => wheel.length * Math.abs(wheel.rate)).reduce((a,b) => a+b, 0);
 
   let pointCount: number;
-  $: pointCount = Math.round(lengthEstimate * 50 / $radiusStore);
+  $: pointCount = Math.round(lengthEstimate * 200 / $radiusStore);
 
   let points: string;
   $: points = getPoints(config);
@@ -112,7 +112,7 @@
     opacity: 0.5;
 
     transition-property: filter, opacity;
-    transition-duration: 1s;
+    transition-duration: 500ms;
   }
 
   .levelComplete {
@@ -127,7 +127,7 @@
 {#if $showStore}
   <polygon
     {points}
-    style={`stroke: var(--${config.color}); filter: drop-shadow(0px 0px 10px var(--light${config.color}));`}
+    style={`stroke: var(--${config.color}); filter: drop-shadow(0px 0px 5px var(--light${config.color}));`}
     class:levelComplete={$levelCompleteStore}
     in:draw|local
     out:fade|local

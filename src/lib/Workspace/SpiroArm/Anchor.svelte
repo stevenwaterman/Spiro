@@ -1,7 +1,7 @@
 <script lang="ts">
   import { isArm, isArmParent, isPrimaryPos, type ArmConfig, type NodeConfig, type NodeConfigPositioned } from "$lib/types";
   import ChildWrapper from "./ChildWrapper.svelte";
-  import {answerStore, durationStore, levelCompleteStore, normalisedAnswerStore, radiusStore} from "$lib/levels";
+  import {durationStore, levelCompleteStore, normalisedAnswerStore, radiusStore} from "$lib/levels";
   import type { PenWheelConfig } from "../SpiroLine/types";
   import { penWheelConfigsStore } from "../SpiroLine/state";
   import Spirograph from "../SpiroLine/Spirograph.svelte";
