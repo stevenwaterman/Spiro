@@ -1,6 +1,6 @@
 import { derived, writable, type Readable, type Writable } from "svelte/store";
-import { answersMatch, fromStringToWheelConfig, normaliseWheels } from "./solution";
-import { nodeLookupStore } from "./state";
+import { answersMatch, fromStringToWheelConfig, fromWheelConfigToString, normaliseWheels } from "./solution";
+import { nodeLookupStore, showStore } from "./state";
 import { isArm, isSecondaryPos, type ArmConfig, type Color, type Length, type NodeConfig, type PenConfig, type Phase, type Rates } from "./types";
 import { clone } from "./utils";
 import { normalisedPenWheelConfigsStore } from "./Workspace/SpiroLine/state";
@@ -80,22 +80,23 @@ const levels: Record<number, Level> = {
     createPen("green")
   ),
 
-  // Length Exists, You don't have to place pens at the end
+  // You can join multiple arms together. Length exists
   2: createLevel(
-    "Lengthy Lesson",
-    1,
-    [[{length: 3, rate: 1, phase: 0}]],
-    createArm(6, 1, "red"),
+    "Teamwork",
+    2,
+    [[{length: 2, rate: 1, phase: 0}, {length: 1, rate: 2, phase: 0}]],
+    createArm(3, 1, "blue"),
+    createArm(2, 1, "red"),
     createPen("green")
   ),
 
-  // You can join multiple arms together
+  // Building up to a more complicated challenge
   3: createLevel(
-    "Teamwork",
-    3,
-    [[{length: 4, rate: 1, phase: 0}, {length: 3, rate: 2, phase: 0}]],
-    createArm(5, 1, "blue"),
+    "Lengthy Lesson",
+    2,
+    [[{length: 2, rate: 1, phase: 0}, {length: 4, rate: 2, phase: 0}]],
     createArm(4, 1, "red"),
+    createArm(5, 1, "blue"),
     createPen("green")
   ),
 
@@ -131,7 +132,7 @@ const levels: Record<number, Level> = {
 
   7: createLevel(
     "Spin Crazy",
-    5,
+    3,
     [[{length: 3, rate: 1, phase: 0}, {length: 3, rate: 13, phase: 0}]],
     createArm(6, 1, "red"),
     createArm(4, 12, "blue"),
@@ -140,7 +141,7 @@ const levels: Record<number, Level> = {
 
   8: createLevel(
     "Getting Rapid",
-    10,
+    7,
     [[{length: 9, rate: 1, phase: 0}, {length: 5, rate: 7, phase: 0}, {length: 1, rate: 31, phase: 0}]],
     createArm(10, 1, "red"),
     createArm(6, 6, "blue"),
@@ -150,28 +151,28 @@ const levels: Record<number, Level> = {
 
   9: createLevel(
     "Flux Capacitor",
-    5,
+    3,
     [[{length: 5, rate: 1, phase: 0}, {length: 3, rate: 2, phase: 0}, {length: 2, rate: 3, phase: 0}, {length: 1, rate: 6, phase: 0}]],
     createArm(6, 1, "red"),
     createArm(4, 1, "orange"),
-    createArm(4, 1, "blue"),
-    createArm(4, 3, "purple"),
+    createArm(3, 1, "blue"),
+    createArm(3, 3, "purple"),
     createPen("green")
   ),
 
   // Introducing negative speeds
   10: createLevel(
     "Going Both Ways",
-    3,
+    2,
     [[{length: 2, rate: 1, phase: 0}, {length: 3, rate: 0, phase: 0}]],
     createArm(4, 1, "red"),
-    createArm(4, -1, "blue"),
+    createArm(5, -1, "blue"),
     createPen("green")
   ),
 
   11: createLevel(
     "Squishy",
-    3,
+    2,
     [[{length: 4, rate: 1, phase: 0}, {length: 2, rate: -1, phase: 0}]],
     createArm(5, -1, "red"),
     createArm(4, 2, "blue"),
@@ -180,7 +181,7 @@ const levels: Record<number, Level> = {
 
   12: createLevel(
     "'Peach'",
-    5,
+    3,
     [[{length: 4, rate: 1, phase: 0}, {length: 2, rate: 2, phase: 0}, {length: 3, rate: 0, phase: 0}]],
     createArm(5, 1, "red"),
     createArm(3, 1, "orange"),
@@ -190,7 +191,7 @@ const levels: Record<number, Level> = {
 
   13: createLevel(
     "Windmill",
-    5,
+    3,
     [[{length: 5, rate: 1, phase: 0}, {length: 5, rate: -2, phase: 0}]],
     createArm(6, -1, "red"),
     createArm(6, 3, "orange"),
@@ -199,7 +200,7 @@ const levels: Record<number, Level> = {
 
   14: createLevel(
     "Fishy",
-    5,
+    4,
     [[{length: 5, rate: 1, phase: 0}, {length: 3, rate: 2, phase: 0}, {length: 5, rate: -1, phase: 0}]],
     createArm(6, -1, "red"),
     createArm(4, -1, "orange"),
@@ -209,8 +210,8 @@ const levels: Record<number, Level> = {
 
   // Introducing Phase
   15: createLevel(
-    "Scroll Stroll",
-    5,
+    "It's Just A Phase",
+    2,
     [[{length: 3, rate: 1, phase: 0}, {length: 3, rate: 2, phase: 3}]],
     createArm(4, 1, "red"),
     createArm(4, 1, "blue", 3),
@@ -219,49 +220,49 @@ const levels: Record<number, Level> = {
 
   16: createLevel(
     "Spectacle",
-    5,
+    4,
     [[{length: 3, rate: 1, phase: 3}, {length: 3, rate: 2, phase: 3}, {length: 4, rate: 4, phase: 3}]],
     createArm(4, 1, "red", 3),
-    createArm(4, 1, "blue", 0),
-    createArm(5, 2, "orange", 0),
+    createArm(4, 1, "blue", 3),
+    createArm(5, 2, "orange", 3),
     createPen("green")
   ),
 
   17: createLevel(
     "Dice",
-    5,
-    [[{length: 3, rate: 1, phase: 2}, {length: 2, rate: 5, phase: 10}, {length: 1, rate: -3, phase: 0}]],
-    createArm(4, 1, "red", 2),
-    createArm(3, 4, "blue", 8),
-    createArm(2, -8, "orange", 4),
+    4,
+    [[{length: 8, rate: 1, phase: 3}, {length: 3, rate: 5, phase: 3}, {length: 2, rate: -3, phase: 9}]],
+    createArm(9, 1, "red", 2),
+    createArm(4, 4, "blue", 10),
+    createArm(3, -8, "orange", 0),
     createPen("green")
   ),
 
   18: createLevel(
     "Subscribe",
-    5,
-    [[{length: 4, rate: 1, phase: 0}, {length: 4, rate: 2, phase: 0}, {length: 3, rate: 0, phase: 9}, {length: 1, rate: -5, phase: 6}]],
-    createArm(5, 1, "red"),
-    createArm(5, 1, "blue"),
+    4,
+    [[{length: 4, rate: 1, phase: 2}, {length: 4, rate: 2, phase: 4}, {length: 3, rate: 0, phase: 9}, {length: 1, rate: -5, phase: 8}]],
+    createArm(5, 1, "red", 2),
+    createArm(5, 1, "blue", 4),
     createArm(4, -2, "orange", 9),
-    createArm(2, -5, "purple", 9),
+    createArm(2, -5, "purple", 8),
     createPen("green")
   ),
 
   19: createLevel(
     "Orbital",
-    5,
+    3,
     [[{length: 3, rate: 1, phase: 0}, {length: 2, rate: 3, phase: 2}, {length: 3, rate: 2, phase: 6}]],
     createArm(4, 1, "red"),
     createArm(4, 2, "blue", 2),
-    createArm(4, -1, "orange", 4),
+    createArm(4, -1, "orange", 6),
     createPen("green")
   ),
 
   // 0-rate arms
   20: createLevel(
     "Just a Stick",
-    5,
+    2,
     [[{length: 3, rate: 1, phase: 0}, {length: 2, rate: 1, phase: 0}, {length: 3, rate: 0, phase: 4}]],
     createArm(4, 1, "red"),
     createArm(4, 0, "blue"),
@@ -272,10 +273,11 @@ const levels: Record<number, Level> = {
   21: createLevel(
     "Percussion",
     3,
-    [[{length: 4, rate: 1, phase: 5}, {length: 3, rate: -2, phase: 6}, {length: 2, rate: -2, phase: 1}]],
-    createArm(5, 1, "red"),
-    createArm(4, -3, "blue"),
-    createArm(3, 0, "orange"),
+    [[{length: 6, rate: 1, phase: 1}, {length: 3, rate: -2, phase: 3}, {length: 2, rate: -2, phase: 11}, {length: 2, rate: -2, phase: 10}]],
+    createArm(7, 1, "red", 2),
+    createArm(4, -3, "blue", 1),
+    createArm(3, 0, "orange", 9),
+    createArm(3, 0, "purple", 8),
     createPen("green")
   ),
 
@@ -283,10 +285,10 @@ const levels: Record<number, Level> = {
     "Feeling Loopy",
     5,
     [[{length: 4, rate: 1, phase: 1}, {length: 2, rate: 3, phase: 2}, {length: 2, rate: 3, phase: 4}, {length: 2, rate: 5, phase: 5}]],
-    createArm(5, 1, "red"),
-    createArm(3, 2, "orange"),
-    createArm(3, 0, "blue"),
-    createArm(3, 2, "purple"),
+    createArm(5, 1, "red", 1),
+    createArm(3, 2, "orange", 2),
+    createArm(3, 0, "blue", 4),
+    createArm(3, 2, "purple", 5),
     createPen("green")
   ),
 
@@ -340,7 +342,9 @@ const levels: Record<number, Level> = {
   ),
 }
 
-export const levelNumberStore: Writable<number> = writable(22);
+export const levelNumberStore: Writable<number> = writable(21);
+levelNumberStore.subscribe(() => showStore.set(false));
+
 export const levelStore: Readable<Level> = derived(levelNumberStore, levelNumber => levels[levelNumber]);
 
 levelStore.subscribe(level => {
@@ -351,7 +355,8 @@ export const durationStore: Readable<number> = derived(levelStore, level => leve
 export const levelNameStore: Readable<string> = derived(levelStore, level => level.name);
 export const answerStore: Readable<WheelConfig[][]> = derived(levelStore, level => level.answer);
 // answerStore.subscribe(s => s.forEach(w => console.log("Answer", fromWheelConfigToString(w))))
-const normalisedAnswerStore: Readable<WheelConfig[][]> = derived(answerStore, answer => answer.map(normaliseWheels));
+export const normalisedAnswerStore: Readable<WheelConfig[][]> = derived(answerStore, answer => answer.map(normaliseWheels));
+normalisedAnswerStore.subscribe(answer => console.log(fromWheelConfigToString(answer[0])))
 
 export const answerCorrectStore: Readable<boolean> = derived(
   [normalisedAnswerStore, normalisedPenWheelConfigsStore],
@@ -364,9 +369,10 @@ export const answerCorrectStore: Readable<boolean> = derived(
 export const levelCompleteStore: Writable<boolean> = writable(false);
 nodeLookupStore.subscribe(() => levelCompleteStore.set(false));
 
-export const radiusStore: Readable<number> = derived(answerStore, answers => {
+function getRadius(answers: WheelConfig[][]): number {
   const radii = answers.map(answer => answer
     .map(wheel => wheel.length)
-    .reduce((a,b) => a+b, 0));
-  return Math.max(0, ...radii);
-});
+    .reduce((a,b) => a+b, 1));
+  return Math.max(1, ...radii);
+}
+export const radiusStore: Readable<number> = derived(answerStore, getRadius);

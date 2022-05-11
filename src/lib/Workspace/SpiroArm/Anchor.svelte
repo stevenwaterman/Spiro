@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { isArm, isArmParent, isParentPos, isPrimaryPos, type ArmConfig, type NodeConfig, type NodeConfigPositioned } from "$lib/types";
+  import { isArm, isArmParent, isPrimaryPos, type ArmConfig, type NodeConfig, type NodeConfigPositioned } from "$lib/types";
   import ChildWrapper from "./ChildWrapper.svelte";
-  import {answerStore, durationStore, levelCompleteStore, radiusStore} from "$lib/levels";
+  import {answerStore, durationStore, levelCompleteStore, normalisedAnswerStore, radiusStore} from "$lib/levels";
   import type { PenWheelConfig } from "../SpiroLine/types";
   import { penWheelConfigsStore } from "../SpiroLine/state";
   import Spirograph from "../SpiroLine/Spirograph.svelte";
   import SpirographAnswer from "../SpiroLine/SpirographAnswer.svelte";
-  import { nodeLookupStore, selectionStore } from "$lib/state";
+  import { nodeLookupStore, selectionStore, showStore } from "$lib/state";
 
   export let nodeConfig: NodeConfigPositioned<"PRIMARY" | "SECONDARY">;
 
@@ -39,31 +39,31 @@
   let length: number;
   $: length = isArm(nodeConfig) ? getLength(nodeConfig, $nodeLookupStore) : 0;
 
-  let unitRadius: number;
-  $: if (primary) {
-    unitRadius = Math.max(length, $radiusStore);
-  } else {
-    unitRadius = length;
-  }
-
   let radius: number;
-  $: radius = Math.max(100, unitRadius * 20)
+  $: if (primary) {
+    radius = Math.max(length, $radiusStore) * 20;
+  } else {
+    radius = length * 20;
+  }
 </script>
 
 <style>
   .anchor {
     position: absolute;
-    transition-property: opacity;
-    transition-duration: 1s;
-    transform: translate(-50%, -50%)
+    width: 0;
+    height: 0;
+    transform: scale(var(--scale));
+    z-index: 0;
   }
 
   .hide {
     opacity: 0;
+    pointer-events: none;
   }
 
   svg {
     pointer-events: none;
+    transform: translate(-50%, -50%);
   }
 
   .center {
@@ -73,17 +73,29 @@
     width: 0;
     height: 0;
     transform-origin: 10px 10px;
+    transition-property: opacity;
+    transition-duration: 500ms;
   }
 
   .selected {
     opacity: 0.5;
     pointer-events: none;
+    z-index: 2;
+  }
+
+  .primary {
+    z-index: 1;
+  }
+
+  .selected svg {
+    opacity: 0;
   }
 </style>
 
 <div
   class="anchor"
   class:selected
+  class:primary
   style={`
     --duration: ${$durationStore};
     left: ${left}%;
@@ -95,8 +107,8 @@
     width={radius * 2}
     height={radius * 2}
   >
-    {#if !$levelCompleteStore && nodeConfig.id === "A"}
-      {#each $answerStore as answer}
+    {#if !$levelCompleteStore && primary}
+      {#each $normalisedAnswerStore as answer}
         <SpirographAnswer config={answer}/>
       {/each}
     {/if}
@@ -111,6 +123,6 @@
     style={`transform: rotate(${rotation}turn);`}
     class:hide={$levelCompleteStore}
   >
-    <ChildWrapper nodeConfig={nodeConfig} anchorId={nodeConfig.id} />
+    <ChildWrapper nodeConfig={nodeConfig} anchorId={nodeConfig.id} parentPhase={rotation} />
   </div>
 </div>

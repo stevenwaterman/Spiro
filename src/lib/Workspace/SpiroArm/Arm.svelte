@@ -1,11 +1,12 @@
 <script lang="ts">
   import { durationStore } from "$lib/levels";
   import { isParentPos, type ArmConfig, type NodeConfigPositioned } from "$lib/types";
-  import { fraction, nodeLookupStore, removePiece, selectionStore, showStore } from "../../state";
+  import { fraction, nodeLookupStore, removePiece, selectionStore, showStore, updateSecondaryLocation } from "../../state";
   import Node from "./Node.svelte";
 
   export let nodeConfig: ArmConfig;
   export let anchorId: string;
+  export let parentPhase: number;
 
   let children: Record<number, NodeConfigPositioned<"PARENT">>;
   $: children = Object.values($nodeLookupStore)
@@ -37,10 +38,11 @@
     })
   }
 
-  function leftClick() {
+  function leftClick(event: MouseEvent) {
     if (nodeConfig.id === "A") return;
 
     removePiece(nodeConfig.id);
+    updateSecondaryLocation(nodeConfig.id, event)
     selectionStore.set(nodeConfig.id);
   }
 
@@ -61,7 +63,6 @@
     border-radius: 20px;
 
     transform-origin: 10px 10px;
-
     transform: rotate(0);
 
     transition-property: transform;
@@ -94,13 +95,6 @@
     font-size: 16px;
 
     user-select: none;
-
-    transition-property: opacity;
-    transition-duration: 500ms;
-  }
-
-  .hide {
-    opacity: 0;
   }
 </style>
 
@@ -119,14 +113,15 @@
   on:click|stopPropagation={leftClick}
 >
   {#each {length: nodeConfig.length} as _, i}
-    <Node parentConfig={nodeConfig} childConfig={children[maxIdx - i]} idx={maxIdx - i} {anchorId} />
+    <Node parentConfig={nodeConfig} childConfig={children[maxIdx - i]} idx={maxIdx - i} {anchorId} {parentPhase} />
   {/each}
 
-  <span
-    class="speed"
-    class:hide={$selectionStore !== undefined}
-    style={`color: var(--${nodeConfig.color});`}
-  >
-    {nodeConfig.rate}
-  </span>
+  {#if nodeConfig.rate !== 0}
+    <span
+      class="speed"
+      style={`color: var(--${nodeConfig.color});`}
+    >
+      {nodeConfig.rate}
+    </span>
+  {/if}
 </div>

@@ -1,18 +1,24 @@
 <script lang="ts">
-  import { answerCorrectStore, durationStore, levelCompleteStore } from "$lib/levels";
+  import { answerCorrectStore, answerStore, durationStore, levelCompleteStore, radiusStore } from "$lib/levels";
   import { linear } from "svelte/easing";
   import { fraction, showStore } from "../../state";
   import type { PenWheelConfig } from "./types";
+  import { fade } from "svelte/transition";
 
   export let idx: number;
   export let config: PenWheelConfig;
+
+  let lengthEstimate: number;
+  $: lengthEstimate = config.wheels.map(wheel => wheel.length * Math.abs(wheel.rate)).reduce((a,b) => a+b, 0);
+
+  let pointCount: number;
+  $: pointCount = Math.round(lengthEstimate * 50 / $radiusStore);
 
   let points: string;
   $: points = getPoints(config);
 
   function getPoints(config: PenWheelConfig): string {
     let points: string = "";
-    const pointCount = 10000;
     for (let i = 0; i < pointCount; i++) {
       const t = Math.PI * 2 * i / pointCount
       points += getPoint(config, t)
@@ -36,6 +42,8 @@
   function getPointLengths(node: SVGPolygonElement): number[] {
     const points = node.points;
     const pointLengths: number[] = [];
+
+    if (points.length <= 1) return [];
 
     let lastPoint: DOMPoint | null = null;
     for (let i = 0; i < points.length; i++) {
@@ -98,6 +106,8 @@
 <style>
   polygon {
     stroke-width: 4;
+    stroke-linejoin: round;
+    
     fill: transparent;
     opacity: 0.5;
 
@@ -119,7 +129,8 @@
     {points}
     style={`stroke: var(--${config.color}); filter: drop-shadow(0px 0px 10px var(--light${config.color}));`}
     class:levelComplete={$levelCompleteStore}
-    in:draw="{{}}"
+    in:draw|local
+    out:fade|local
     on:introend={animationDone}
   />
 {/if}

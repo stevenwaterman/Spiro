@@ -1,5 +1,5 @@
 import { derived, writable, type Readable, type Writable } from "svelte/store";
-import type { NodeConfig } from "./types";
+import { isSecondaryPos, type NodeConfig } from "./types";
 
 export const nodeLookupStore: Writable<Record<string, NodeConfig>> = writable({
   "A": {
@@ -33,7 +33,11 @@ export const selectedAnchorStore: Readable<string | undefined> = derived(
 
 export const fraction = 1;
 
-export const showStore = derived(selectionStore, selection => selection === undefined);
+export const showStore: Writable<boolean> = writable(false);
+selectionStore.subscribe(selection => {
+  if (selection !== undefined) showStore.set(false);
+});
+
 
 // let oldAnchor: string | undefined = undefined;
 // anchorIdStore.subscribe(anchor => {
@@ -99,3 +103,20 @@ export function removePiece(id: string) {
 //   delete conf.placement;
 //   return record;
 // }
+
+export function updateSecondaryLocation(id: string | undefined, event: MouseEvent) {
+  if (id === undefined) return;
+
+  const left = 100 * event.clientX / window.innerWidth;
+  const top = 100 * event.clientY / window.innerHeight;
+
+  nodeLookupStore.update(nodes => {
+    const node = nodes[id];
+    if (!isSecondaryPos(node)) return nodes;
+    
+    node.parent.left = left;
+    node.parent.top = top;
+    
+    return nodes;
+  })
+}

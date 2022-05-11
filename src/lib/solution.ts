@@ -1,3 +1,4 @@
+import { debug } from "svelte/internal";
 import type { WheelConfig } from "./Workspace/SpiroLine/types";
 
 export function answersMatch(as: WheelConfig[][], bs: WheelConfig[][]): boolean {
@@ -65,7 +66,7 @@ export function normaliseWheels(wheels: WheelConfig[]): WheelConfig[] {
   const normalisedPhase = normalisePhase(normalisedRates)
   const normalString = fromWheelConfigToString(normalisedPhase);
 
-  const invertRate = normalisedPhase.map(config => ({ ...config, rate: -config.rate }));
+  const invertRate = normalisedPhase.map(config => ({...config, rate: -config.rate}));
   invertRate.sort((a, b) => a.rate - b.rate);
   const invertString = fromWheelConfigToString(invertRate);
 
@@ -94,9 +95,16 @@ function combineSameRate(a: WheelConfig, b: WheelConfig): WheelConfig {
   const deltaX = aDeltaX + bDeltaX;
   const deltaY = aDeltaY + bDeltaY;
   const length = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
-  const angle = Math.acos(deltaX / length);
-  const phase = 12 * angle / (2 * Math.PI);
-  return { length, phase, rate };
+
+  const angle1 = Math.acos(deltaX / length) / (2 * Math.PI);
+  const angle2 = 1 - angle1;
+  const angle = deltaY > 0 ? angle1 : angle2;
+
+  const phase = 12 * angle;
+
+  const output = { length, phase, rate };
+  // console.log({deltaX, deltaY, length, angle})
+  return output;
 }
 
 function gcd(a: number, b: number): number {

@@ -5,10 +5,11 @@
 
   export let nodeConfig: NodeConfig | undefined;
   export let anchorId: string;
+  export let parentPhase: number;
 </script>
 
 {#if isArm(nodeConfig)}
-  <Arm {nodeConfig} {anchorId}/>
+  <Arm {nodeConfig} {anchorId} {parentPhase}/>
 {:else if isPen(nodeConfig)}
   <Pen {nodeConfig} {anchorId}/>
 {/if}

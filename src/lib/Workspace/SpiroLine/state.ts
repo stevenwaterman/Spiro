@@ -1,4 +1,4 @@
-import { normaliseWheels } from "$lib/solution";
+import { fromWheelConfigToString, normaliseWheels } from "$lib/solution";
 import { nodeLookupStore } from "$lib/state";
 import { isParentPos, isPen, type ArmConfig, type NodeConfig, type PenConfig } from "$lib/types";
 import { derived, type Readable } from "svelte/store";
@@ -61,20 +61,19 @@ function getPenWheelConfig(pen: PenConfig, nodeLookup: Record<string, NodeConfig
 function getWheelConfig(nodeConfig: NodeConfig, nodeLookup: Record<string, NodeConfig>): {wheels: WheelConfig[], anchorId: string} {
   if (!isParentPos(nodeConfig)) return {wheels: [], anchorId: nodeConfig.id};
 
-  const parentConfig = nodeLookup[nodeConfig.parent.id] as ArmConfig;
+  const armConfig = nodeLookup[nodeConfig.parent.id] as ArmConfig;
   const newWheel: WheelConfig = { 
     length: nodeConfig.parent.idx,
-    rate: parentConfig.rate,
-    phase: parentConfig.phase
+    rate: armConfig.rate,
+    phase: armConfig.phase
   };
 
-  const config = getWheelConfig(parentConfig, nodeLookup);
+  const config = getWheelConfig(armConfig, nodeLookup);
   const wheels = config.wheels;
   
   if (wheels.length > 0) {
     const lastWheel = wheels[wheels.length - 1];
     newWheel.rate += lastWheel.rate;
-    newWheel.phase += lastWheel.phase;
   }
 
   wheels.push(newWheel);
@@ -88,4 +87,4 @@ export const normalisedPenWheelConfigsStore: Readable<Record<string, WheelConfig
   })
   return output;
 });
-// penWheelConfigsStore.subscribe(p => p.forEach(c => console.log(fromWheelConfigToString(c.wheels))));
+normalisedPenWheelConfigsStore.subscribe(p => Object.values(p).flat().filter(x => x !== undefined).filter(c => c.length > 0).forEach(c => console.log(fromWheelConfigToString(c))));
