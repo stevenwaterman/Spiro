@@ -4,12 +4,6 @@
   
   export let nodeConfig: PenConfig;
   export let anchorId: string;
-  export let ghost: boolean;
-
-
-  function rightClick() {
-    removePiece(nodeConfig.id);
-  }
 
   function leftClick() {
     removePiece(nodeConfig.id);
@@ -31,17 +25,10 @@
   .pen:not(.ghost) {
     cursor: pointer;
   }
-
-  .ghost {
-    opacity: 0.5;
-    pointer-events: none;
-  }
 </style>
 
 <div
   class="pen"
-  class:ghost
   style={`background-color: var(--${nodeConfig.color})`}
-  on:contextmenu|preventDefault|stopPropagation={rightClick}
   on:click|stopPropagation={leftClick}
 />

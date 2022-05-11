@@ -1,8 +1,7 @@
 <script lang="ts">
-  // import SpirographController from "./SpiroLine/SpirographController.svelte";
   import Anchor from "./SpiroArm/Anchor.svelte";
-  import { levelCompleteStore, levelNameStore, levelNumberStore, radiusStore } from "$lib/levels";
-  import type { NodeConfig } from "$lib/types";
+  import { levelNameStore, levelNumberStore, radiusStore } from "$lib/levels";
+  import { isPrimaryPos, isSecondaryPos, type NodeConfigPositioned } from "$lib/types";
   import { nodeLookupStore, selectionStore } from "$lib/state";
 
   let width: number;
@@ -13,10 +12,34 @@
   let scale: number;
   $: scale = Math.min(10, maxAllowedRadius / $radiusStore);
 
-  let anchors: NodeConfig[];
-  $: anchors = Object.values($nodeLookupStore)
-    .filter(conf => conf.parent === undefined)
-    .filter(conf => conf.id !== "A");
+  let secondaries: NodeConfigPositioned<"SECONDARY">[];
+  $: secondaries = Object.values($nodeLookupStore)
+    .filter(isSecondaryPos);
+
+  let primary: NodeConfigPositioned<"PRIMARY">;
+  $: primary = Object.values($nodeLookupStore).find(isPrimaryPos) as NodeConfigPositioned<"PRIMARY">;
+
+  function mouseMove(event: MouseEvent) {
+    const selection = $selectionStore;
+    if (selection === undefined) return;
+
+    const left = 100 * event.clientX / width;
+    const top = 100 * event.clientY / height;
+
+    nodeLookupStore.update(nodes => {
+      const selected = nodes[selection];
+      if (!isSecondaryPos(selected)) return nodes;
+      
+      selected.parent.left = left;
+      selected.parent.top = top;
+      
+      return nodes;
+    })
+  }
+
+  function click(event: MouseEvent) {
+    selectionStore.set(undefined);
+  }
 </script>
 
 <style>
@@ -31,14 +54,6 @@
 
     transition: flex-grow 1s;
   }
-
-  .center {
-    display: inline-flex;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%)
-  }
   
   .scale {
     display: inline-flex;
@@ -47,22 +62,6 @@
     transition-duration: 500ms;
 
     transform: scale(var(--scale));
-  }
-
-  .dot {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-
-    width: 6px;
-    height: 6px;
-    background-color: var(--white);
-    border-radius: 100%;
-
-    transform: translate(-50%, -50%);
-
-    transition-property: opacity;
-    transition-duration: 1s;
   }
 
   .level {
@@ -75,18 +74,6 @@
     opacity: 0.5;
     filter: blur(1.5px);
   }
-
-  .row {
-    display: flex;
-    flex-direction: column;
-
-    height: 100%;
-    /* width: var(--radius); */
-    width: fit-content;
-    overflow-y: scroll;
-
-    align-items: center;
-  }
 </style>
 
 <div class="level">
@@ -94,18 +81,14 @@
 </div>
 
 {#key $levelNumberStore}
-  <div class="row" style={`--radius: ${$radiusStore}px;`}>
-    {#each anchors as anchor (anchor.id)}
-      <Anchor nodeConfig={anchor}/>
-    {/each}
-  </div>
+  <div class="container" bind:clientHeight={height} bind:clientWidth={width} on:mousemove={mouseMove} on:click|self={click}>
+    <!-- <div class="scale" style={`--scale: ${scale}`}> -->
+      <Anchor nodeConfig={primary}/>
 
-  <div class="container" bind:clientHeight={height} bind:clientWidth={width}>
-    <div class="center">
-      <div class="scale" style={`--scale: ${scale}`}>
-        <Anchor nodeConfig={$nodeLookupStore["A"]} primary/>
-      </div>
-    </div>
+      {#each secondaries as anchor (anchor.id)}
+        <Anchor nodeConfig={anchor}/>
+      {/each}
+    <!-- </div> -->
   </div>
 {/key}
 

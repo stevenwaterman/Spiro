@@ -5,7 +5,7 @@ export const nodeLookupStore: Writable<Record<string, NodeConfig>> = writable({
   "A": {
     id: "A",
     type: "ARM",
-    parent: undefined,
+    parent: {type: "PRIMARY"},
 
     length: 1,
     rate: 0,
@@ -22,8 +22,9 @@ export const selectedAnchorStore: Readable<string | undefined> = derived(
   [nodeLookupStore, selectionStore],
   ([nodeLookup, selection]) => {
     if (selection === undefined) return undefined;
-    let node = nodeLookup[selection];
-    while (node.parent !== undefined) {
+
+    let node: NodeConfig = nodeLookup[selection];
+    while (node.parent.type === "PARENT") {
       node = nodeLookup[node.parent.id];
     }
     return node.id;
@@ -66,14 +67,14 @@ export const showStore = derived(selectionStore, selection => selection === unde
 export function placeSelection(parentId: string, childId: string, idx: number) {
   nodeLookupStore.update(record => {
     const child = record[childId];
-    child.parent = { id: parentId, idx };
+    child.parent = { type: "PARENT", id: parentId, idx };
     return record;
   });
 }
 
 export function removePiece(id: string) {
   nodeLookupStore.update(record => {
-    record[id].parent = undefined;
+    record[id].parent = {type: "SECONDARY", left: 0, top: 0};
     return record;
     // Object.values(record).forEach(conf => {
     //   if (conf.nodeType === "ARM") {

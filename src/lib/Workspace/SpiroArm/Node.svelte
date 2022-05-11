@@ -1,27 +1,22 @@
 <script lang="ts">
   import { nodeLookupStore, placeSelection, selectedAnchorStore, selectionStore } from "$lib/state";
-  import type { ArmConfig, NodeConfig } from "$lib/types";
+  import { isArm, type ArmConfig, type NodeConfig } from "$lib/types";
   import ChildWrapper from "./ChildWrapper.svelte";
 
   export let parentConfig: ArmConfig;
   export let childConfig: NodeConfig | undefined;
   export let idx: number;
   export let anchorId: string;
-  export let ghost: boolean;
 
   let isFirst: boolean;
   $: isFirst = idx === 0;
 
   let isPlacementOption: boolean;
-  $: isPlacementOption = !ghost && !isFirst && $selectionStore !== undefined && childConfig === undefined && $selectedAnchorStore !== anchorId;
-
-  let hovered: boolean = false;
-  function mouseEnter() {
-    hovered = true;
-  }
-  function mouseLeave() {
-    hovered = false;
-  }
+  $: isPlacementOption = 
+    !isFirst && 
+    $selectionStore !== undefined && 
+    childConfig === undefined && 
+    $selectedAnchorStore !== anchorId;
 
   function leftClick(event: MouseEvent) {
     if (!isPlacementOption || $selectionStore == undefined) return;
@@ -44,15 +39,7 @@
   // }
 
   let rotation: number;
-  $: if (isPlacementOption && hovered && $selectionStore) {
-    const conf = $nodeLookupStore[$selectionStore];
-    if (conf.type === "ARM") rotation = conf.phase / 12;
-    else rotation = 0;
-  } else if (childConfig?.type === "ARM") {
-    rotation = childConfig.phase / 12;
-  } else {
-    rotation = 0;
-  }
+  $: rotation = isArm(childConfig) ? childConfig.phase / 12 : 0;
 </script>
 
 <style>
@@ -97,18 +84,11 @@
   class="node"
   class:isFirst
   class:isPlacementOption
-  class:hovered
-  on:mouseenter|stopPropagation={mouseEnter}
-  on:mouseleave|stopPropagation={mouseLeave}
   on:click={leftClick}
   style={`transform: rotate(${rotation}turn);`}
   class:hasChild={childConfig !== undefined}
 >
   <div class="dot" />
 
-  {#if isPlacementOption && hovered && $selectionStore}
-    <ChildWrapper nodeConfig={$nodeLookupStore[$selectionStore]} {anchorId} ghost/>
-  {:else if childConfig !== undefined}
-    <ChildWrapper nodeConfig={childConfig} {anchorId} ghost={ghost}/>
-  {/if}
+  <ChildWrapper nodeConfig={childConfig} {anchorId}/>
 </div>

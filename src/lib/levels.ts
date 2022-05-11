@@ -1,7 +1,7 @@
 import { derived, writable, type Readable, type Writable } from "svelte/store";
-import { answersMatch, fromStringToWheelConfig, fromWheelConfigToString, normaliseWheels } from "./solution";
-import { nodeLookupStore, selectionStore } from "./state";
-import type { ArmConfig, Color, Length, NodeConfig, PenConfig, Phase, Rates } from "./types";
+import { answersMatch, fromStringToWheelConfig, normaliseWheels } from "./solution";
+import { nodeLookupStore } from "./state";
+import { isArm, isSecondaryPos, type ArmConfig, type Color, type Length, type NodeConfig, type PenConfig, type Phase, type Rates } from "./types";
 import { clone } from "./utils";
 import { normalisedPenWheelConfigsStore } from "./Workspace/SpiroLine/state";
 import type { WheelConfig } from "./Workspace/SpiroLine/types";
@@ -16,9 +16,19 @@ type Level = {
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 function createLevel(name: string, duration: number, answer: WheelConfig[][], ...nodes: NodeConfig[][]): Level {
   const pieces: Record<string, NodeConfig> = {};
-  nodes.flat().forEach((node, idx) => {
+  const nodeConfigs = nodes.flat();
+
+  const primaryAnchor = nodeConfigs.find(isArm);
+  if (primaryAnchor !== undefined) primaryAnchor.parent = {type: "PRIMARY"};
+
+  nodeConfigs.forEach((node, idx) => {
     node.id = alphabet[idx];
     pieces[node.id] = node;
+
+    if (isSecondaryPos(node)) {
+      node.parent.left = 10;
+      node.parent.top = 10 + 80 * idx / nodeConfigs.length
+    }
   });
 
   return {
@@ -35,7 +45,7 @@ function createArm(length: Length, rate: Rates, color: Color, phase: Phase = 0, 
     output.push({
       id: "TODO",
       type: "ARM",
-      parent: undefined,
+      parent: { type: "SECONDARY", left: 0, top: 0 },
 
       length,
       rate,
@@ -50,7 +60,11 @@ function createPen(color: Color): PenConfig[] {
   return [{
     id: "TODO",
     type: "PEN",
-    parent: undefined,
+    parent: {
+      type: "SECONDARY",
+      left: 0,
+      top: 0
+    },
 
     color
   }];

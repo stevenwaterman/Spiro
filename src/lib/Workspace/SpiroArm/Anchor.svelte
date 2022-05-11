@@ -1,37 +1,43 @@
 <script lang="ts">
-  import type { ArmConfig, NodeConfig } from "$lib/types";
+  import { isArm, isArmParent, isParentPos, isPrimaryPos, type ArmConfig, type NodeConfig, type NodeConfigPositioned } from "$lib/types";
   import ChildWrapper from "./ChildWrapper.svelte";
   import {answerStore, durationStore, levelCompleteStore, radiusStore} from "$lib/levels";
   import type { PenWheelConfig } from "../SpiroLine/types";
   import { penWheelConfigsStore } from "../SpiroLine/state";
   import Spirograph from "../SpiroLine/Spirograph.svelte";
   import SpirographAnswer from "../SpiroLine/SpirographAnswer.svelte";
-  import { nodeLookupStore } from "$lib/state";
+  import { nodeLookupStore, selectionStore } from "$lib/state";
 
-  export let nodeConfig: NodeConfig;
-  export let primary: boolean = false; 
+  export let nodeConfig: NodeConfigPositioned<"PRIMARY" | "SECONDARY">;
 
-  let anchorId: string;
-  $: anchorId = nodeConfig.id;
+  let primary: boolean; 
+  $: primary = isPrimaryPos(nodeConfig);
 
-  let anchor: NodeConfig;
-  $: anchor = $nodeLookupStore[anchorId];
+  let selected: boolean;
+  $: selected = $selectionStore === nodeConfig.id;
+
+  let left: number;
+  $: left = primary ? 50 : nodeConfig.parent["left"];
+
+  let top: number;
+  $: top = primary ? 50 : nodeConfig.parent["top"];
 
   let rotation: number;
-  $: rotation = nodeConfig.type === "ARM" ? nodeConfig.phase / 12 : 0; 
+  $: rotation = isArm(nodeConfig) ? nodeConfig.phase / 12 : 0; 
 
   let penWheelConfigs: PenWheelConfig[];
   $: penWheelConfigs = $penWheelConfigsStore[nodeConfig.id] ?? [];
 
   function getLength(arm: ArmConfig, nodeLookup: Record<string, NodeConfig>): number {
-    const children = Object.values(nodeLookup).filter(node => node.parent?.id === arm.id && node.type === "ARM") as ArmConfig[];
-    const childLengths = children.map(child => (child.parent?.idx ?? 0) + getLength(child, nodeLookup));
-    const longest = Math.max(arm.length, ...childLengths);
-    return longest;
+    const childLengths = Object.values(nodeLookup)
+      .filter(isArmParent)
+      .filter(node => node.parent.id === arm.id)
+      .map(child => child.parent.idx + getLength(child, nodeLookup));
+    return Math.max(arm.length, ...childLengths);
   }
 
   let length: number;
-  $: length = anchor.type === "ARM" ? getLength(anchor, $nodeLookupStore) : 0;
+  $: length = isArm(nodeConfig) ? getLength(nodeConfig, $nodeLookupStore) : 0;
 
   let unitRadius: number;
   $: if (primary) {
@@ -46,9 +52,10 @@
 
 <style>
   .anchor {
-    position: relative;
+    position: absolute;
     transition-property: opacity;
     transition-duration: 1s;
+    transform: translate(-50%, -50%)
   }
 
   .hide {
@@ -67,9 +74,22 @@
     height: 0;
     transform-origin: 10px 10px;
   }
+
+  .selected {
+    opacity: 0.5;
+    pointer-events: none;
+  }
 </style>
 
-<div class="anchor" style={`--duration: ${$durationStore};`}>
+<div
+  class="anchor"
+  class:selected
+  style={`
+    --duration: ${$durationStore};
+    left: ${left}%;
+    top: ${top}%;
+  `}
+>
   <svg
     viewBox={`${-radius} ${-radius} ${radius * 2} ${radius * 2}`}
     width={radius * 2}
@@ -91,6 +111,6 @@
     style={`transform: rotate(${rotation}turn);`}
     class:hide={$levelCompleteStore}
   >
-    <ChildWrapper nodeConfig={nodeConfig} {anchorId} />
+    <ChildWrapper nodeConfig={nodeConfig} anchorId={nodeConfig.id} />
   </div>
 </div>

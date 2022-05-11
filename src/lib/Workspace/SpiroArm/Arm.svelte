@@ -1,20 +1,20 @@
 <script lang="ts">
   import { durationStore } from "$lib/levels";
-  import type { ArmConfig, NodeConfig } from "$lib/types";
+  import { isParentPos, type ArmConfig, type NodeConfigPositioned } from "$lib/types";
   import { fraction, nodeLookupStore, removePiece, selectionStore, showStore } from "../../state";
   import Node from "./Node.svelte";
 
   export let nodeConfig: ArmConfig;
   export let anchorId: string;
-  export let ghost: boolean;
 
-  let children: Record<number, NodeConfig>;
+  let children: Record<number, NodeConfigPositioned<"PARENT">>;
   $: children = Object.values($nodeLookupStore)
-    .filter(child => child.parent?.id === nodeConfig.id)
+    .filter(isParentPos)
+    .filter(node => node.parent.id === nodeConfig.id)
     .reduce((acc, elem) => {
-      acc[elem.parent?.idx as number] = elem;
+      acc[elem.parent.idx] = elem;
       return acc;
-    }, {} as Record<number, NodeConfig>);
+    }, {} as Record<number, NodeConfigPositioned<"PARENT">>);
 
   let arm: HTMLDivElement | undefined;
 
@@ -35,12 +35,6 @@
     setTimeout(() => {
       resetting = false;
     })
-  }
-
-  function rightClick() {
-    if (nodeConfig.id === "A") return;
-
-    removePiece(nodeConfig.id);
   }
 
   function leftClick() {
@@ -89,11 +83,6 @@
     transform: rotate(var(--shortcutRotations));
   }
 
-  .ghost {
-    opacity: 0.5;
-    pointer-events: none;
-  }
-
   .speed {
     position: absolute;
     left: 50%;
@@ -105,6 +94,13 @@
     font-size: 16px;
 
     user-select: none;
+
+    transition-property: opacity;
+    transition-duration: 500ms;
+  }
+
+  .hide {
+    opacity: 0;
   }
 </style>
 
@@ -113,7 +109,6 @@
   bind:this={arm}
   class:show={$showStore}
   class:resetting
-  class:ghost
 
   style={`
     --rotations: ${rotations};
@@ -121,12 +116,17 @@
     background-color: var(--light${nodeConfig.color});
   `}
 
-  on:contextmenu|preventDefault|stopPropagation={rightClick}
   on:click|stopPropagation={leftClick}
 >
   {#each {length: nodeConfig.length} as _, i}
-    <Node parentConfig={nodeConfig} childConfig={children[maxIdx - i]} idx={maxIdx - i} {anchorId} {ghost} />
+    <Node parentConfig={nodeConfig} childConfig={children[maxIdx - i]} idx={maxIdx - i} {anchorId} />
   {/each}
 
-  <span class="speed" style={`color: var(--${nodeConfig.color});`}>{nodeConfig.rate}</span>
+  <span
+    class="speed"
+    class:hide={$selectionStore !== undefined}
+    style={`color: var(--${nodeConfig.color});`}
+  >
+    {nodeConfig.rate}
+  </span>
 </div>
