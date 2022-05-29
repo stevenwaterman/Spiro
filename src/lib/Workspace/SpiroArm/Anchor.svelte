@@ -83,7 +83,7 @@
     z-index: 2;
   }
 
-  .primary {
+  :not(.primary) {
     z-index: 1;
   }
 

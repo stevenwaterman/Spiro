@@ -50,23 +50,49 @@
 
     filter: blur(0.5px)
   }
+
+  .level {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+
+    color: var(--green);
+    font-weight: bold;
+    font-size: 10vw;
+    opacity: 0.8;
+  }
+
+  .sub {
+    margin-top: 1em;
+    font-size: 0.8em;
+  }
 </style>
 
 <svelte:body on:keydown={keyDown}/>
 
 <div class="container">
-  <Visualisation/>
-  {#if $levelCompleteStore}
-    <button transition:fade on:click={nextLevel} on:keydown|preventDefault>
-      <Fa icon={faArrowCircleRight} />
-    </button>
-  {:else}
-    <button transition:fade on:click={playPause} on:keydown|preventDefault>
-      {#if $showStore}
-        <Fa icon={faPause} />
+  {#if $levelNumberStore <= 15}
+      <Visualisation/>
+      {#if $levelCompleteStore}
+        <button transition:fade on:click={nextLevel} on:keydown|preventDefault>
+          <Fa icon={faArrowCircleRight} />
+        </button>
       {:else}
-        <Fa icon={faPlay} />
+        <button transition:fade on:click={playPause} on:keydown|preventDefault>
+          {#if $showStore}
+            <Fa icon={faPause} />
+          {:else}
+            <Fa icon={faPlay} />
+          {/if}
+        </button>
       {/if}
-    </button>
+  {:else}
+    <div class="level">
+      <span>You Win!</span>
+      <span class="sub">Thanks for Playing</span>
+    </div>
   {/if}
 </div>

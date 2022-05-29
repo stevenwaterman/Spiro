@@ -59,11 +59,11 @@
     on:click={click}
     style={`--scale: ${scale}`}
   >
+    <Anchor nodeConfig={primary}/>
+
     {#each secondaries as anchor (anchor.id)}
       <Anchor nodeConfig={anchor}/>
     {/each}
-
-    <Anchor nodeConfig={primary}/>
   </div>
 {/key}
 

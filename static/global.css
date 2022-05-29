@@ -22,8 +22,13 @@ body {
   --lightpurple: #bdb2ff;
   --purple: #54478c;
 
-  --white: #cee3e1;
-  --grey: #708d8b;
-  --black: #002a32;
+  --lightwhite: #dcf0ee;
+  --white: #c9dddc;
+
+  --lightgrey: #708d8b;
+  --grey: #455756;
+
+  --lightblack: #00333d;
+  --black: #001c22;
 }
 
