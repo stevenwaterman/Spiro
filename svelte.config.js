@@ -16,6 +16,9 @@ const config = {
     trailingSlash: "always",
     prerender: {
       default: true
+    },
+    paths: {
+      base: "/Spiro"
     }
 	}
 };
