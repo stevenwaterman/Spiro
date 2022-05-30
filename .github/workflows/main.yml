@@ -24,6 +24,7 @@ jobs:
         git add public/* -f
         git mv public/* ./ -k
         touch .nojekyll
+        git add .nojekyll
         git commit -m "Update hosted version"
     - uses: ad-m/github-push-action@master
       with:
