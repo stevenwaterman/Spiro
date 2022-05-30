@@ -16,7 +16,7 @@
 	"devDependencies": {
 		"@fortawesome/free-solid-svg-icons": "^5.15.4",
 		"@sveltejs/adapter-static": "1.0.0-next.32",
-		"@sveltejs/kit": "1.0.0-next.345",
+		"@sveltejs/kit": "1.0.0-next.338",
 		"@types/diff": "^5.0.2",
 		"@types/prettier": "^2.4.3",
 		"@typescript-eslint/eslint-plugin": "^4.31.1",
@@ -25,7 +25,6 @@
 		"eslint": "^7.32.0",
 		"eslint-config-prettier": "^8.3.0",
 		"eslint-plugin-svelte3": "^3.2.1",
-		"highlight.js": "^11.4.0",
 		"prettier": "^2.5.1",
 		"prettier-plugin-svelte": "^2.4.0",
 		"svelte": "^3.44.0",

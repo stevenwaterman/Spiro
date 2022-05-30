@@ -8,7 +8,7 @@ const config = {
 	preprocess: preprocess({ typescript: true }),
 
 	kit: {
-		// adapter: adapter({ pages: "./public" }),
+		adapter: adapter({ pages: "./public" }),
     browser: {
       hydrate: true,
 		  router: true
