@@ -21,9 +21,16 @@ jobs:
         git config --local user.name "GitHub Action"
         git checkout --orphan gh-pages
         git reset
-        git add public/* -f
+        git add public/* public/.nojekyll -f
+    - run: ls
+    - run: ls public
+    - run: git status
+    - run: |
         git mv public/* ./ -k
-        git mv public/.nojekyll .
+    - run: ls
+    - run: ls public
+    - run: git status
+    - run: |
         git commit -m "Update hosted version"
     - uses: ad-m/github-push-action@master
       with:
