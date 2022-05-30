@@ -22,8 +22,8 @@ jobs:
         git checkout --orphan gh-pages
         git reset
         git add public/* -f
-        git add public/.* -f
         git mv public/* ./ -k
+        git mv public/.nojekyll .
         git commit -m "Update hosted version"
     - uses: ad-m/github-push-action@master
       with:
